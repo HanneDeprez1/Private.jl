@@ -72,7 +72,9 @@ function hotelling(epochs::Array, freq_of_interest::Number, fs::Number;
     recording_noise_amplitude = epoch_noise_amplitude / sqrt(size(epochs, 2))
     noise_power = real(recording_noise_amplitude .^2)
 
-    snrDb = signal_power ./ noise_power
+    snr = signal_power ./ noise_power
+    snrDb = 10*log10(convert(Array{FloatingPoint}, snr))
+
 
     for_stats = [real(bins) , imag(bins)]
     statistic = [_hotelling_T2_1sample(for_stats[:, :, i]') for i = 1:size(for_stats, 3)]
