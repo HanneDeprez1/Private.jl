@@ -23,8 +23,7 @@ s = hotelling(s)
 
 @test_approx_eq_eps s.processing["hotelling1"][:NoisePower][2:end]   [0.1625531784 0.1624553511 0.2744051671 0.1951633702  0.2178213209] 0.001
 
-@test_approx_eq_eps s.processing["hotelling1"][:SNRdB][2:end]        [0.1508996733 0.0856492686 2.6132638177 0.0621181890  0.1927828278] 0.001
-
 @test_approx_eq_eps s.processing["hotelling1"][:Statistic][2:end]    [0.8264963627 0.8860469460 0.0565369725 0.9547960758 0.7870649099] 0.001
 
+@test_approx_eq_eps s.processing["hotelling1"][:SNRdB][2:end]        [0.1508996733 0.0856492686 2.6132638177 0.0621181890  0.1927828278] 0.001
 

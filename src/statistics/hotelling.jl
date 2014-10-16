@@ -1,12 +1,21 @@
 using Distributions
 using EEG
 using DataFrames
+using DSP
+using Logging
 
 
 function hotelling(a::ASSR, freq_of_interest::Number; ID::String="", kwargs...)
 
+    # TODO: Account for multiple applied filters
+    if haskey(a.processing, "filter1")
+        used_filter = a.processing["filter1"]
+    else
+        used_filter = nothing
+    end
+
     snrDb, phase, signal, noise, statistic =
-        hotelling(a.processing["epochs"], float(a.modulation_frequency), int(a.sample_rate))
+        hotelling(a.processing["epochs"], freq_of_interest, int(a.sample_rate), used_filter=used_filter; kwargs...)
 
     result = DataFrame(
                         ID                  = vec(repmat([ID], length(a.channel_names), 1)),
@@ -53,6 +62,8 @@ function hotelling(epochs::Array, freq_of_interest::Number, fs::Number;
     spectrum    = _hotelling_spectrum(epochs)
     frequencies = linspace(0, 1, int(size(epochs,1) / 2 + 1))*fs/2
     idx         = _find_closest_number_idx(frequencies, freq_of_interest)
+
+    info("Calculating hotelling statistic on $(size(epochs)[end]) channels at $freq_of_interest Hz with $(size(epochs)[2]) epochs")
 
     # Compensate for filter response
     if !(used_filter == nothing)
