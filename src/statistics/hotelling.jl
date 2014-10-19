@@ -3,8 +3,14 @@ using EEG
 using DataFrames
 using DSP
 using Logging
+using Docile
+@docstrings
 
 
+@doc """
+Hotelling test on ASSR data
+Saves results in a.processing["hotelling#"]
+""" ->
 function hotelling(a::ASSR, freq_of_interest::Number; ID::String="", kwargs...)
 
     # TODO: Account for multiple applied filters
