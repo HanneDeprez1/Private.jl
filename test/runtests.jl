@@ -1,5 +1,7 @@
 using Private
 using Base.Test
+using Logging
 
-# write your own tests here
-@test 1 == 1
+Logging.configure(level=DEBUG)
+
+include("statistics/hotelling.jl")
