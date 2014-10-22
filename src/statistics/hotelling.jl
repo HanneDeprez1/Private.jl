@@ -8,10 +8,10 @@ using Docile
 
 
 @doc """
-Hotelling test on ASSR data
+Hotelling test on SSR data
 Saves results in a.processing["hotelling#"]
 """ ->
-function hotelling(a::ASSR, freq_of_interest::Number; ID::String="", kwargs...)
+function hotelling(a::SSR, freq_of_interest::Number; ID::String="", kwargs...)
 
     # TODO: Account for multiple applied filters
     if haskey(a.processing, "filter1")
@@ -46,14 +46,14 @@ end
 
 
 # If more than one frequency of interest is specified then run for all
-function hotelling(a::ASSR, freq_of_interest::Array; kwargs...)
+function hotelling(a::SSR, freq_of_interest::Array; kwargs...)
 
     for f = freq_of_interest; a = hotelling(a, f; kwargs...); end; return a
 end
 
 
 # If no frequency of interest is specified then use the modulation frequency
-function hotelling(a::ASSR; kwargs...)
+function hotelling(a::SSR; kwargs...)
 
     hotelling(a, float(a.modulation_frequency); kwargs...)
 end
