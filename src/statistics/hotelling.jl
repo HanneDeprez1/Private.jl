@@ -85,13 +85,18 @@ function hotelling(epochs::Array, freq_of_interest::Number, fs::Number;
     signal_power     = signal_amplitude.^2
     signal_phase     = angle(squeeze(mean(bins,2), [1, 2]))
 
-    epoch_noise_amplitude = [std([squeeze(bins[1, :, i], [1, 3]), mean(squeeze(bins[1, :, i], [1, 3]))]) for i = 1: size(bins,3)]
-    recording_noise_amplitude = epoch_noise_amplitude / sqrt(size(epochs, 2))
-    noise_power = real(recording_noise_amplitude .^2)
 
-    snr = signal_power ./ noise_power
-    snrDb = 10*log10(convert(Array{FloatingPoint}, snr))
+    noise_power = FloatingPoint[]
+    for i in 1:size(bins,3)
+        d = [squeeze(bins[1, :, i], [1, 3]), mean(squeeze(bins[1, :, i], [1, 3]))]
+        d = std(d)                      # epoch_noise_amplitude
+        d = d / sqrt(size(epochs,2))    # recording_noise_amplitude
+        d = real(d .^2)                 # recording_noise_power
+        push!(noise_power, d)
+    end
 
+    snr   = signal_power ./ noise_power
+    snrDb = 10*log10(snr)
 
     for_stats = [real(bins) , imag(bins)]
     statistic = [_hotelling_T2_1sample(for_stats[:, :, i]') for i = 1:size(for_stats, 3)]
