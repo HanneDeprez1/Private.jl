@@ -38,6 +38,8 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
     valid_trip_idx = find(new_triggers["Code"]-252 .== 33)
 
     count = 0
+    previous_value = 0     # Not used, but will stop
+    previous_idx   = 1     # lint error
     for i in 1:length(valid_trip_idx)-1
         count += 1
 
