@@ -4,6 +4,7 @@ using DataFrames
 using DSP
 using Logging
 using Docile
+using Compat
 @docstrings
 
 
@@ -43,7 +44,7 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
         result = add_dataframe_static_rows(result, kwargs)
 
         key_name = new_processing_key(a.processing, "hotelling")
-        merge!(a.processing, [key_name => result])
+        merge!(a.processing, @compat Dict(key_name => result) )
 
     end
 
