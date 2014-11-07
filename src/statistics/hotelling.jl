@@ -26,7 +26,7 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
     for freq in freq_of_interest
 
         snrDb, phase, signal, noise, statistic =
-            hotelling(spectrum, freq, int(a.sample_rate), used_filter; kwargs...)
+            hotelling(spectrum, freq, int(a.sample_rate), used_filter)
 
         result = DataFrame(
                             ID                  = vec(repmat([ID], length(a.channel_names), 1)),
@@ -68,7 +68,7 @@ end
 
 
 
-function hotelling(spectrum::Union(Array{Complex{Float64},3}, Array{Complex{Float32},3}), freq_of_interest::Real, fs::Real, used_filter::Union(Filter, Nothing); kwargs...)
+function hotelling(spectrum::Union(Array{Complex{Float64},3}, Array{Complex{Float32},3}), freq_of_interest::Real, fs::Real, used_filter::Union(Filter, Nothing))
 
     frequencies = linspace(0, 1, int(size(spectrum, 1)))*fs/2
     idx         = _find_closest_number_idx(frequencies, freq_of_interest)
