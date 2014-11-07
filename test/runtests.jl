@@ -5,3 +5,4 @@ using Logging
 Logging.configure(level=DEBUG)
 
 include("statistics/hotelling.jl")
+include("reshaping/subsample.jl")
