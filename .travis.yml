@@ -6,7 +6,7 @@ notifications:
 before_install:
   - pwd
   - wget https://julialang.s3.amazonaws.com/bin/linux/x64/0.3/julia-0.3.2-linux-x86_64.tar.gz
-  - tar -xzfv julia-0.3.2-linux-x86_64.tar.gz
+  - tar -xzvf julia-0.3.2-linux-x86_64.tar.gz
   - ls
   - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.clone("git://github.com/codles/EEG.jl.git")'
   # - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
