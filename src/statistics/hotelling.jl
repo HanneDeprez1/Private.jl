@@ -21,8 +21,9 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
     if haskey(a.processing, "filter1")
         used_filter         = a.processing["filter1"]
         filter_response     = freqz(used_filter, frequencies, float(a.sample_rate))
-        filter_compensation = convert(Array{FloatingPoint}, [abs(f)^2 for f = filter_response])
-        spectrum            = spectrum ./ filter_compensation
+        for f = 1:length(filter_response)
+            spectrum[f, :, :] = spectrum[f, :, :] ./ abs(filter_response[f])^2
+        end
         debug("Accounted for filter response in hotelling test spectrum estimation")
     end
 
@@ -73,7 +74,6 @@ function hotelling(spectrum::Union(Array{Complex{Float64},3}, Array{Complex{Floa
 
     info("Calculating hotelling statistic on $(size(spectrum)[end]) channels at $freq_of_interest Hz with $(size(spectrum)[2]) epochs")
 
-    #=frequencies = linspace(0, 1, int(size(spectrum, 1)))*fs/2=#
     idx         = _find_closest_number_idx(frequencies, freq_of_interest)
 
     bins = spectrum[idx, :, :]
