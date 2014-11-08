@@ -14,19 +14,21 @@ Saves results in a.processing["hotelling#"]
 """ ->
 function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.modulation_frequency), ID::String="", kwargs...)
 
+    spectrum    = _hotelling_spectrum(a.processing["epochs"])
+    frequencies = linspace(0, 1, int(size(spectrum, 1)))*float(a.sample_rate)/2
+
     # TODO: Account for multiple applied filters
     if haskey(a.processing, "filter1")
-        used_filter = a.processing["filter1"]
-    else
-        used_filter = nothing
+        used_filter         = a.processing["filter1"]
+        filter_response     = freqz(used_filter, frequencies, float(a.sample_rate))
+        filter_compensation = convert(Array{FloatingPoint}, [abs(f)^2 for f = filter_response])
+        spectrum            = spectrum ./ filter_compensation
+        debug("Accounted for filter response in hotelling test spectrum estimation")
     end
-
-    spectrum = _hotelling_spectrum(a.processing["epochs"])
 
     for freq in freq_of_interest
 
-        snrDb, phase, signal, noise, statistic =
-            hotelling(spectrum, freq, int(a.sample_rate), used_filter)
+        snrDb, phase, signal, noise, statistic = hotelling(spectrum, freq, int(a.sample_rate))
 
         result = DataFrame(
                             ID                  = vec(repmat([ID], length(a.channel_names), 1)),
@@ -65,31 +67,18 @@ function hotelling(epochs::Union(Array{Float64, 3}, Array{Float32, 3}), args...;
     hotelling(_hotelling_spectrum(epochs), args...; kwargs...)
 end
 
+function hotelling(spectrum::Union(Array{Complex{Float64},3}, Array{Complex{Float32},3}, Array{Complex{FloatingPoint},3}), freq_of_interest::Real, fs::Real)
 
-
-
-function hotelling(spectrum::Union(Array{Complex{Float64},3}, Array{Complex{Float32},3}), freq_of_interest::Real, fs::Real, used_filter::Union(Filter, Nothing))
+    info("Calculating hotelling statistic on $(size(spectrum)[end]) channels at $freq_of_interest Hz with $(size(spectrum)[2]) epochs")
 
     frequencies = linspace(0, 1, int(size(spectrum, 1)))*fs/2
     idx         = _find_closest_number_idx(frequencies, freq_of_interest)
 
-
-    info("Calculating hotelling statistic on $(size(spectrum)[end]) channels at $freq_of_interest Hz with $(size(spectrum)[2]) epochs")
-
-    # Compensate for filter response
-    if !(used_filter == nothing)
-        filter_response     = freqz(used_filter, frequencies, fs)
-        filter_compensation = [abs(f)^2 for f = filter_response]
-        spectrum            = spectrum ./ filter_compensation
-        debug("Accounted for filter response in F test spectrum estimation")
-    end
-
     bins = spectrum[idx, :, :]
 
-    signal_amplitude = abs(squeeze(mean(bins,2), [1, 2]))
-    signal_power     = signal_amplitude.^2
-    signal_phase     = angle(squeeze(mean(bins,2), [1, 2]))
-
+    signal_amplitude = float(abs(squeeze(mean(bins,2), [1, 2])))
+    signal_power     = float(signal_amplitude.^2)
+    signal_phase     = float(angle(squeeze(mean(bins,2), [1, 2])))
 
     noise_power = FloatingPoint[]
     for i in 1:size(bins,3)
