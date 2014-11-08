@@ -14,22 +14,15 @@ Saves results in a.processing["hotelling#"]
 """ ->
 function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.modulation_frequency), ID::String="", kwargs...)
 
+    # Calculate spectrum of each epoch
+    # Do calculation here once, instead of in each low level call
     spectrum    = _hotelling_spectrum(a.processing["epochs"])
+    spectrum    = compensate_for_filter(a.processing, spectrum, float(a.sample_rate))
     frequencies = linspace(0, 1, int(size(spectrum, 1)))*float(a.sample_rate)/2
-
-    # TODO: Account for multiple applied filters
-    if haskey(a.processing, "filter1")
-        used_filter         = a.processing["filter1"]
-        filter_response     = freqz(used_filter, frequencies, float(a.sample_rate))
-        for f = 1:length(filter_response)
-            spectrum[f, :, :] = spectrum[f, :, :] ./ abs(filter_response[f])^2
-        end
-        debug("Accounted for filter response in hotelling test spectrum estimation")
-    end
 
     for freq in freq_of_interest
 
-        snrDb, phase, signal, noise, statistic = hotelling(spectrum, frequencies, freq, int(a.sample_rate))
+        snrDb, phase, signal, noise, statistic = hotelling(spectrum, frequencies, freq, float(a.sample_rate))
 
         result = DataFrame(
                             ID                  = vec(repmat([ID], length(a.channel_names), 1)),
