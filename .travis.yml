@@ -3,16 +3,11 @@ compiler:
   - clang
 notifications:
   email: false
-env:
-  matrix:
-    - JULIAVERSION="juliareleases"
-    # - JULIAVERSION="julianightlies"
 before_install:
-  - sudo add-apt-repository ppa:staticfloat/julia-deps -y
-  - sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
-  - sudo apt-get update -qq -y
-  - sudo apt-get install libpcre3-dev julia -y
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - pwd
+  - wget https://julialang.s3.amazonaws.com/bin/linux/x64/0.3/julia-0.3.2-linux-x86_64.tar.gz
+  - tar -xzf julia-0.3.2-linux-x86_64.tar.gz
+  # - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 script:
   - julia -e 'Pkg.clone("git://github.com/codles/EEG.jl.git")'
   - julia -e 'Pkg.init(); Pkg.clone(pwd()); Pkg.test("Private")'
