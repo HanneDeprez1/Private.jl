@@ -24,8 +24,7 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
 
         snrDb, phase, signal, noise, statistic = hotelling(spectrum, frequencies, freq, float(a.sample_rate))
 
-        result = DataFrame(
-                            ID                  = vec(repmat([ID], length(a.channel_names), 1)),
+        result = DataFrame( ID                  = vec(repmat([ID], length(a.channel_names), 1)),
                             Channel             = copy(a.channel_names),
                             ModulationFrequency = copy(float(a.modulation_frequency)),
                             AnalysisType        = "hotelling",
@@ -34,14 +33,11 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
                             SignalPhase         = vec(phase),
                             NoisePower          = convert(Array{FloatingPoint}, noise),
                             SNRdB               = convert(Array{FloatingPoint}, snrDb),
-                            Statistic           = vec(statistic)
-                          )
+                            Statistic           = vec(statistic)  )
 
-        result = add_dataframe_static_rows(result, kwargs)
-
+        result   = add_dataframe_static_rows(result, kwargs)
         key_name = new_processing_key(a.processing, "hotelling")
         merge!(a.processing, @compat Dict(key_name => result) )
-
     end
 
     return a
@@ -67,28 +63,30 @@ function hotelling(spectrum::Union(Array{Complex{Float64},3}, Array{Complex{Floa
 
     info("Calculating hotelling statistic on $(size(spectrum)[end]) channels at $freq_of_interest Hz with $(size(spectrum)[2]) epochs")
 
-    idx         = _find_closest_number_idx(frequencies, freq_of_interest)
-
+    idx  = _find_closest_number_idx(frequencies, freq_of_interest)
     bins = spectrum[idx, :, :]
+    for_stats = [real(bins) , imag(bins)]
 
     signal_amplitude = float(abs(squeeze(mean(bins,2), [1, 2])))
     signal_power     = float(signal_amplitude.^2)
     signal_phase     = float(angle(squeeze(mean(bins,2), [1, 2])))
 
-    noise_power = FloatingPoint[]
-    for i in 1:size(bins,3)
-        d = [squeeze(bins[1, :, i], [1, 3]), mean(squeeze(bins[1, :, i], [1, 3]))]
-        d = std(d)                      # epoch_noise_amplitude
-        d = d / sqrt(size(spectrum, 2)) # recording_noise_amplitude
-        d = real(d .^2)                 # recording_noise_power
-        push!(noise_power, d)
+    noise_power = Array(FloatingPoint, size(bins, 3))
+    snrDb       = Array(FloatingPoint, size(bins, 3))
+    statistic   = Array(FloatingPoint, size(bins, 3))
+
+    for c in 1:size(bins,3)
+
+        # Calculate noise
+        n = [squeeze(bins[1, :, c], [1, 3]), mean(squeeze(bins[1, :, c], [1, 3]))]
+        n = std(n)                      # epoch_noise_amplitude
+        n = n / sqrt(size(spectrum, 2)) # recording_noise_amplitude
+
+        # Save metrics
+        noise_power[c] = real(n .^2)    # recording_noise_power
+        snrDb[c]       = 10 * log10( signal_power[c] / noise_power[c] )
+        statistic[c]   = _hotelling_T2_1sample(for_stats[:, :, c]')
     end
-
-    snr   = signal_power ./ noise_power
-    snrDb = 10*log10(snr)
-
-    for_stats = [real(bins) , imag(bins)]
-    statistic = [_hotelling_T2_1sample(for_stats[:, :, i]') for i = 1:size(for_stats, 3)]
 
     return snrDb, signal_phase, signal_power, noise_power, statistic
 end
@@ -124,7 +122,6 @@ function _hotelling_spectrum(sweep::Array{Float64,3}; ref::Int=0)
 
     # Calculate amplitude sweepe at each frequency along first dimension
     fftSweep    = 2 / sweepLen * fft(sweep, 1)
-
 
     spectrum    = fftSweep[1:sweepLen / 2 + 1, :, :]
 
