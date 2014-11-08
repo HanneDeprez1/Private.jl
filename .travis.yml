@@ -11,5 +11,7 @@ before_install:
   - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.clone("git://github.com/codles/EEG.jl.git")'
   - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.clone("https://github.com/codles/MinMaxFilter.jl.git")'
   - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.clone("git@github.com:codles/Private.jl.git")'
+  - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.update()'       # Required for Tk to work
+  - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.build("EEG")'   # Required for Tk to work
 script:
   - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.test("Private")'
