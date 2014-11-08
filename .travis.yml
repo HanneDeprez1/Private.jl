@@ -11,5 +11,6 @@ before_install:
   - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.clone("git://github.com/codles/EEG.jl.git")'
   # - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 script:
-  - julia -e 'Pkg.clone("git://github.com/codles/EEG.jl.git")'
-  - julia -e 'Pkg.init(); Pkg.clone(pwd()); Pkg.test("Private")'
+  - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.clone("git://github.com/codles/EEG.jl.git")'
+  - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.clone("git@github.com:codles/Private.jl.git")'
+  - /home/travis/build/codles/Private.jl/julia-8227746b95/bin/julia -e 'Pkg.test("Private")'
