@@ -43,3 +43,6 @@ println("F test")
 println()
 println("Hotelling")
 @time a = hotelling(a, [1:50])
+
+@profile hotelling(a, [1:50])
+Profile.print()
