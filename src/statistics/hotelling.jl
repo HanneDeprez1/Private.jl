@@ -22,7 +22,7 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
 
     for freq in freq_of_interest
 
-        snrDb, phase, signal, noise, statistic = hotelling(spectrum, frequencies, freq, float(a.sample_rate))
+        snrDb, phase, signal, noise, statistic = hotelling(spectrum, frequencies, freq)
 
         result = DataFrame( ID                  = vec(repmat([ID], length(a.channel_names), 1)),
                             Channel             = copy(a.channel_names),
@@ -50,16 +50,8 @@ function hotelling(a::SSR, freq_of_interest::Union(Real, AbstractArray); kwargs.
 end
 
 
-function hotelling(epochs::Union(Array{Float64, 3}, Array{Float32, 3}), args...; kwargs...)
-
-    spectrum    = _hotelling_spectrum(a.processing["epochs"])
-    frequencies = linspace(0, 1, int(size(spectrum, 1)))*float(a.sample_rate)/2
-
-    hotelling(spectrum, frequencies, args...; kwargs...)
-end
-
 function hotelling(spectrum::Union(Array{Complex{Float64},3}, Array{Complex{Float32},3}, Array{Complex{FloatingPoint},3}),
-                   frequencies::AbstractArray, freq_of_interest::Real, fs::Real)
+                   frequencies::AbstractArray, freq_of_interest::Real)
 
     info("Calculating hotelling statistic on $(size(spectrum)[end]) channels at $freq_of_interest Hz with $(size(spectrum)[2]) epochs")
 
@@ -117,23 +109,9 @@ function _hotelling_T2_1sample(data; corr::Number=1)
 end
 
 
-# Calculates the spectrum for hotelling
-function _hotelling_spectrum(sweep::Array{Float64,3}; ref::Int=0)
-    # First dimension is samples, second dimension if existing is channels
+function _hotelling_spectrum(sweep::Union(Array{Float64,3}, Array{Float32,3}, Array{FloatingPoint,3}))
 
-    sweepLen      = size(sweep)[1]
+    sweepLen = size(sweep)[1]
 
-    # Calculate amplitude sweepe at each frequency along first dimension
-    fftSweep    = 2 / sweepLen * fft(sweep, 1)
-
-    spectrum    = fftSweep[1:sweepLen / 2 + 1, :, :]
-
-    if ref > 0
-        refspec = spectrum[:,ref]
-        for i = 1:size(spectrum)[2]
-            spectrum[:,i] = spectrum[:,i] - refspec
-        end
-    end
-
-    return spectrum
+    (2 / sweepLen) * fft(sweep, 1)[1:sweepLen / 2 + 1, :, :]
 end

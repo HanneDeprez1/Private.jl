@@ -1,9 +1,11 @@
 using Private
 using Base.Test
 using Logging
+using Lint
 
 Logging.configure(level=DEBUG)
 
 include("statistics/hotelling.jl")
 include("reshaping/subsample.jl")
 include("../profiling/profile.jl")
+lintpkg( "Private" )
