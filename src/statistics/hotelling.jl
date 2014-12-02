@@ -50,8 +50,7 @@ function hotelling(a::SSR, freq_of_interest::Union(Real, AbstractArray); kwargs.
 end
 
 
-function hotelling(spectrum::Union(Array{Complex{Float64},3}, Array{Complex{Float32},3}, Array{Complex{FloatingPoint},3}),
-                   frequencies::AbstractArray, freq_of_interest::Real)
+function hotelling{T <: FloatingPoint}(spectrum::Array{Complex{T},3}, frequencies::AbstractArray, freq_of_interest::Real)
 
     info("Calculating hotelling statistic on $(size(spectrum)[end]) channels at $freq_of_interest Hz with $(size(spectrum)[2]) epochs")
 
@@ -109,7 +108,7 @@ function _hotelling_T2_1sample(data; corr::Number=1)
 end
 
 
-function _hotelling_spectrum(sweep::Union(Array{Float64,3}, Array{Float32,3}, Array{FloatingPoint,3}))
+function _hotelling_spectrum{T <: FloatingPoint}(sweep::Array{T,3})
 
     sweepLen = size(sweep)[1]
 
