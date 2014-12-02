@@ -20,6 +20,7 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
     spectrum    = compensate_for_filter(a.processing, spectrum, float(a.sample_rate))
     frequencies = linspace(0, 1, int(size(spectrum, 1)))*float(a.sample_rate)/2
 
+    to_save = nothing
     for freq in freq_of_interest
 
         snrDb, phase, signal, noise, statistic = hotelling(spectrum, frequencies, freq)
@@ -34,11 +35,18 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
                             NoisePower          = vec(noise),
                             SNRdB               = vec(snrDb),
                             Statistic           = vec(statistic)  )
+        result = add_dataframe_static_rows(result, kwargs)
 
-        result   = add_dataframe_static_rows(result, kwargs)
-        key_name = new_processing_key(a.processing, "hotelling")
-        merge!(a.processing, @compat Dict(key_name => result) )
+        if freq == freq_of_interest[1]
+            to_save = result
+        else
+            to_save = rbind(to_save, result)
+        end
+
     end
+
+    key_name = new_processing_key(a.processing, "hotelling")
+    merge!(a.processing, @compat Dict(key_name => to_save) )
 
     return a
 end
