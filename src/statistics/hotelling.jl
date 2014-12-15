@@ -65,12 +65,12 @@ function hotelling{T <: FloatingPoint}(spectrum::Array{Complex{T},3}, frequencie
     idx  = _find_closest_number_idx(frequencies, freq_of_interest)
     for_stats = [real(spectrum[idx, :, :]) , imag(spectrum[idx, :, :])]
 
-    signal_amplitude = Array(FloatingPoint, size(spectrum, 3))
-    signal_power     = Array(FloatingPoint, size(spectrum, 3))
-    signal_phase     = Array(FloatingPoint, size(spectrum, 3))
-    noise_power      = Array(FloatingPoint, size(spectrum, 3))
-    snrDb            = Array(FloatingPoint, size(spectrum, 3))
-    statistic        = Array(FloatingPoint, size(spectrum, 3))
+    signal_amplitude = Array(T, size(spectrum, 3))
+    signal_power     = Array(T, size(spectrum, 3))
+    signal_phase     = Array(T, size(spectrum, 3))
+    noise_power      = Array(T, size(spectrum, 3))
+    snrDb            = Array(T, size(spectrum, 3))
+    statistic        = Array(T, size(spectrum, 3))
 
     for c in 1:size(spectrum,3)
 
