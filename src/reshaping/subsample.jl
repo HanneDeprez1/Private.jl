@@ -1,7 +1,7 @@
 using Gadfly
 
 function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.001, subsample_stop_delay::Number=0.0015,
-                   plot::Bool=false, plot_center::Number=2.9, plot_name::String="$(a.file_name)-subsample")
+                   plot::Bool=false, plot_center::Number=2.9, plot_name::String="$(a.file_name)-subsample", trigger_code::Int=1)
 
     # Add a trigger (22) where each CI artifact starts
     # Add a trigger (33) where to start sampling the valid response
@@ -28,11 +28,11 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
     end
 
 
-    new_triggers = extra_triggers(a.triggers, 1, 22, 1/a.processing["Carrier_Frequency"], float(a.sample_rate))
+    new_triggers = extra_triggers(a.triggers, trigger_code, 22, 1/a.processing["Carrier_Frequency"], float(a.samplingrate))
 
-    new_triggers = extra_triggers(new_triggers, [1, 22], 33, subsample_start_delay, float(a.sample_rate), max_inserted=1)
+    new_triggers = extra_triggers(new_triggers, [trigger_code, 22], 33, subsample_start_delay, float(a.samplingrate), max_inserted=1)
 
-    new_triggers = extra_triggers(new_triggers, [1, 22], 34, subsample_stop_delay,  float(a.sample_rate), max_inserted=1)
+    new_triggers = extra_triggers(new_triggers, [trigger_code, 22], 34, subsample_stop_delay,  float(a.samplingrate), max_inserted=1)
 
     # Run through all the 33s and interpolate between averaged valid values
     valid_trip_idx = find(new_triggers["Code"]-252 .== 33)
@@ -47,6 +47,10 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
         if new_triggers["Code"][valid_trip_idx[i]+1]-252 == 34
 
             valid_range = new_triggers["Index"][valid_trip_idx[i]] : 1 : new_triggers["Index"][valid_trip_idx[i]+1]
+
+            if i == 1
+              debug("Averaging $(length(valid_range)) data points for subsample")
+            end
 
             mean_value  = mean(a.data[valid_range ,:], 1)
 
