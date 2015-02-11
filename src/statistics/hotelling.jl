@@ -12,13 +12,13 @@ using Compat
 Hotelling test on SSR data
 Saves results in a.processing["hotelling#"]
 """ ->
-function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.modulation_frequency), ID::String="", kwargs...)
+function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.modulationrate), ID::String="", kwargs...)
 
     # Calculate spectrum of each epoch
     # Do calculation here once, instead of in each low level call
     spectrum    = _hotelling_spectrum(a.processing["epochs"])
-    spectrum    = compensate_for_filter(a.processing, spectrum, float(a.sample_rate))
-    frequencies = linspace(0, 1, int(size(spectrum, 1)))*float(a.sample_rate)/2
+    spectrum    = compensate_for_filter(a.processing, spectrum, float(a.samplingrate))
+    frequencies = linspace(0, 1, int(size(spectrum, 1)))*float(a.samplingrate)/2
 
     to_save = nothing
     for freq in freq_of_interest
@@ -27,7 +27,7 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
 
         result = DataFrame( ID                  = vec(repmat([ID], length(a.channel_names), 1)),
                             Channel             = copy(a.channel_names),
-                            ModulationFrequency = copy(float(a.modulation_frequency)),
+                            modulationrateuency = copy(float(a.modulationrate)),
                             AnalysisType        = "hotelling",
                             AnalysisFrequency   = freq,
                             SignalPower         = vec(signal),

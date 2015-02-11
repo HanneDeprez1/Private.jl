@@ -11,12 +11,12 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
 
     info("Subsampling SSR")
 
-    a.processing["time"] = [1:size(a.data,1)]/float(a.sample_rate)
+    a.processing["time"] = [1:size(a.data,1)]/float(a.samplingrate)
 
     if plot
 
         l0 = layer( x=a.processing["time"], y=a.data[:,plot_channel], Geom.line)
-        l1 = layer( xintercept=a.triggers["Index"]/float(a.sample_rate), Geom.vline(color="black"))
+        l1 = layer( xintercept=a.triggers["Index"]/float(a.samplingrate), Geom.vline(color="black"))
 
         p1 = Gadfly.plot(l0, l1,
             Scale.x_continuous(maxvalue=maximum(a.processing["time"])),
@@ -77,17 +77,17 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
     if plot
 
         l2 = layer(
-            xintercept=new_triggers["Index"][new_triggers["Code"].== 22+252]/float(a.sample_rate),
+            xintercept=new_triggers["Index"][new_triggers["Code"].== 22+252]/float(a.samplingrate),
             Geom.vline(color="red")
             )
 
         l3 = layer(
-            xintercept=new_triggers["Index"][new_triggers["Code"].== 33+252]/float(a.sample_rate),
+            xintercept=new_triggers["Index"][new_triggers["Code"].== 33+252]/float(a.samplingrate),
             Geom.vline(color="green")
             )
 
         l4 = layer(
-            xintercept=new_triggers["Index"][new_triggers["Code"].== 34+252]/float(a.sample_rate),
+            xintercept=new_triggers["Index"][new_triggers["Code"].== 34+252]/float(a.samplingrate),
             Geom.vline(color="orange")
             )
 
@@ -99,7 +99,7 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
             )
 
         l7 = layer(
-            xintercept=a.triggers["Index"]/float(a.sample_rate),
+            xintercept=a.triggers["Index"]/float(a.samplingrate),
             Geom.vline(color="black")
             )
 
@@ -146,5 +146,3 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
 
     return a
 end
-
-
