@@ -40,7 +40,7 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
         if freq == freq_of_interest[1]
             to_save = result
         else
-            to_save = rbind(to_save, result)
+            to_save = vcat(to_save, result)
         end
 
     end
