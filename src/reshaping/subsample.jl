@@ -11,12 +11,12 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
 
     info("Subsampling SSR")
 
-    a.processing["time"] = [1:size(a.data,1)]/float(a.samplingrate)
+    a.processing["time"] = [1:size(a.data,1)]/samplingrate(a)
 
     if plot
 
         l0 = layer( x=a.processing["time"], y=a.data[:,plot_channel], Geom.line)
-        l1 = layer( xintercept=a.triggers["Index"]/float(a.samplingrate), Geom.vline(color="black"))
+        l1 = layer( xintercept=a.triggers["Index"]/samplingrate(a), Geom.vline(color="black"))
 
         p1 = Gadfly.plot(l0, l1,
             Scale.x_continuous(maxvalue=maximum(a.processing["time"])),
@@ -28,11 +28,11 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
     end
 
 
-    new_triggers = extra_triggers(a.triggers, trigger_code, 22, 1/a.processing["Carrier_Frequency"], float(a.samplingrate))
+    new_triggers = extra_triggers(a.triggers, trigger_code, 22, 1/a.processing["Carrier_Frequency"], samplingrate(a))
 
-    new_triggers = extra_triggers(new_triggers, [trigger_code, 22], 33, subsample_start_delay, float(a.samplingrate), max_inserted=1)
+    new_triggers = extra_triggers(new_triggers, [trigger_code, 22], 33, subsample_start_delay, samplingrate(a), max_inserted=1)
 
-    new_triggers = extra_triggers(new_triggers, [trigger_code, 22], 34, subsample_stop_delay,  float(a.samplingrate), max_inserted=1)
+    new_triggers = extra_triggers(new_triggers, [trigger_code, 22], 34, subsample_stop_delay,  samplingrate(a), max_inserted=1)
 
     # Run through all the 33s and interpolate between averaged valid values
     valid_trip_idx = find(new_triggers["Code"]-252 .== 33)
@@ -81,17 +81,17 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
     if plot
 
         l2 = layer(
-            xintercept=new_triggers["Index"][new_triggers["Code"].== 22+252]/float(a.samplingrate),
+            xintercept=new_triggers["Index"][new_triggers["Code"].== 22+252]/samplingrate(a),
             Geom.vline(color="red")
             )
 
         l3 = layer(
-            xintercept=new_triggers["Index"][new_triggers["Code"].== 33+252]/float(a.samplingrate),
+            xintercept=new_triggers["Index"][new_triggers["Code"].== 33+252]/samplingrate(a),
             Geom.vline(color="green")
             )
 
         l4 = layer(
-            xintercept=new_triggers["Index"][new_triggers["Code"].== 34+252]/float(a.samplingrate),
+            xintercept=new_triggers["Index"][new_triggers["Code"].== 34+252]/samplingrate(a),
             Geom.vline(color="orange")
             )
 
@@ -103,7 +103,7 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
             )
 
         l7 = layer(
-            xintercept=a.triggers["Index"]/float(a.samplingrate),
+            xintercept=a.triggers["Index"]/samplingrate(a),
             Geom.vline(color="black")
             )
 

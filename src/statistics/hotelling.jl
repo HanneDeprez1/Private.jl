@@ -18,7 +18,7 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
     # Do calculation here once, instead of in each low level call
     spectrum    = _hotelling_spectrum(a.processing["epochs"])
     spectrum    = compensate_for_filter(a.processing, spectrum, float(a.samplingrate))
-    frequencies = linspace(0, 1, int(size(spectrum, 1)))*float(a.samplingrate)/2
+    frequencies = linspace(0, 1, int(size(spectrum, 1)))*samplingrate(a)/2
 
     to_save = nothing
     for freq in freq_of_interest
