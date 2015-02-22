@@ -9,7 +9,7 @@ fname = joinpath(dirname(@__FILE__), "../data", "test_Hz19.5-testing.bdf")
 
 s = read_SSR(fname)
 
-s.modulation_frequency = 40
+s.modulationrate = 40
 
 s = rereference(s, "Cz")
 
@@ -26,4 +26,3 @@ s = hotelling(s)
 @test_approx_eq_eps s.processing["hotelling1"][:Statistic][2:end]    [0.8264963627 0.8860469460 0.0565369725 0.9547960758 0.7870649099] 0.001
 
 @test_approx_eq_eps s.processing["hotelling1"][:SNRdB][2:end]        10*log10([0.1508996733 0.0856492686 2.6132638177 0.0621181890  0.1927828278]) 0.001
-
