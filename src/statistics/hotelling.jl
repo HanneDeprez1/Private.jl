@@ -5,6 +5,7 @@ using DSP
 using Logging
 using Docile
 using Compat
+using Gadfly
 @docstrings
 
 
@@ -121,4 +122,34 @@ function _hotelling_spectrum{T <: FloatingPoint}(sweep::Array{T,3})
     sweepLen = size(sweep)[1]
 
     (2 / sweepLen) * fft(sweep, 1)[1:sweepLen / 2 + 1, :, :]
+end
+
+
+function plot_hotelling{T <: FloatingPoint}(spectrum::Array{Complex{T},3}, frequencies::AbstractArray, freq_of_interest::Real; c::Int=1, fig_name="hot.pdf")
+
+    idx  = _find_closest_number_idx(frequencies, freq_of_interest)
+    for_plots = [vec(real(spectrum[idx, :, :])) ; vec(imag(spectrum[idx, :, :]))]
+
+    # Signal metrics
+    signal_amplitude = abs(mean(spectrum[idx, :, c], 2))[1]
+    signal_power     = signal_amplitude[c]^2
+    signal_phase     = angle(mean(spectrum[idx, :, c], 2))[1]
+
+    # Calculate noise
+    n = [squeeze(spectrum[idx, :, c], [1, 3]), mean(squeeze(spectrum[idx, :, c], [1, 3]))]
+    n = std(n)                      # Noise amplitude per epoch
+    n = n / sqrt(size(spectrum, 2)) # Noise amplitude of recording
+
+    # Save metrics
+    noise_power = real(n .^2)    # Noise power of recording
+    snrDb       = 10 * log10( signal_power / noise_power )
+
+    d = layer(x=for_plots, Geom.histogram)
+    s = layer(xintercept=[signal_amplitude], Geom.vline(color="black"))
+    n = layer(xintercept=[-n, n] .+ signal_amplitude, Geom.vline(color="red"))
+    p = plot(n, s, d,
+        Guide.xlabel("Real and Imag FFT Bin (uV)"),
+        Guide.title("SNR = $(round(snrDb[1], 3)) (dB)"))
+
+    draw(PDF(fig_name, 26cm, 17cm), p)
 end

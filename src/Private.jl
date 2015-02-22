@@ -1,7 +1,8 @@
 module Private
 
 export
-    hotelling
+    hotelling,
+    plot_hotelling
 include("statistics/hotelling.jl")
 
 export
