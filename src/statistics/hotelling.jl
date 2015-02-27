@@ -11,7 +11,7 @@ using Gadfly
 
 @doc """
 Hotelling test on SSR data
-Saves results in a.processing["hotelling#"]
+Saves results in a.processing["hotelling"]
 """ ->
 function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.modulationrate), ID::String="", kwargs...)
 
@@ -28,7 +28,7 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
 
         result = DataFrame( ID                  = vec(repmat([ID], length(a.channel_names), 1)),
                             Channel             = copy(a.channel_names),
-                            modulationrateuency = copy(float(a.modulationrate)),
+                            ModulationRate      = copy(float(a.modulationrate)),
                             AnalysisType        = "hotelling",
                             AnalysisFrequency   = freq,
                             SignalPower         = vec(signal),
