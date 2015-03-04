@@ -1,7 +1,10 @@
 using Gadfly
 
-function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.001, subsample_stop_delay::Number=0.0015,
-                   plot::Bool=false, plot_center::Number=2.9, plot_name::String="$(a.file_name)-subsample", trigger_code::Int=1)
+function subsample(a::SSR; valid_triggers::Int=1,
+                   temptrigger_rate::FloatingPoint=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
+                   subsample_start_delay::Number=0.001, temptrigger_start_idx=33,
+                   subsample_stop_delay::Number=0.0015, temptrigger_stop_idx=34,
+                   plot::Bool=false, plot_channel::Int=1, plot_center::Number=0.2, plot_name::String="$(a.file_name)-subsample")
 
     # Add a trigger (22) where each CI artifact starts
     # Add a trigger (33) where to start sampling the valid response
@@ -28,11 +31,11 @@ function subsample(a::SSR; plot_channel::Int=1, subsample_start_delay::Number=0.
     end
 
 
-    new_triggers = extra_triggers(a.triggers, trigger_code, 22, 1/a.processing["Carrier_Frequency"], samplingrate(a))
+    new_triggers = extra_triggers(a.triggers, valid_triggers, temptrigger_rate_code, temptrigger_rate, samplingrate(a))
 
-    new_triggers = extra_triggers(new_triggers, [trigger_code, 22], 33, subsample_start_delay, samplingrate(a), max_inserted=1)
+    new_triggers = extra_triggers(new_triggers, [valid_triggers, temptrigger_rate_code], temptrigger_start_idx, subsample_start_delay, samplingrate(a), max_inserted=1)
 
-    new_triggers = extra_triggers(new_triggers, [trigger_code, 22], 34, subsample_stop_delay,  samplingrate(a), max_inserted=1)
+    new_triggers = extra_triggers(new_triggers, [valid_triggers, temptrigger_rate_code], temptrigger_stop_idx, subsample_stop_delay, samplingrate(a), max_inserted=1)
 
     # Run through all the 33s and interpolate between averaged valid values
     valid_trip_idx = find(new_triggers["Code"]-252 .== 33)
