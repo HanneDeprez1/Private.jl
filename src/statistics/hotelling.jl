@@ -13,13 +13,13 @@ using Gadfly
 Hotelling test on SSR data
 Saves results in a.processing["hotelling"]
 """ ->
-function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.modulationrate), ID::String="", kwargs...)
+function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=modulationrate(a), ID::String="", kwargs...)
 
     # Calculate spectrum of each epoch
     # Do calculation here once, instead of in each low level call
     spectrum    = _hotelling_spectrum(a.processing["epochs"])
-    spectrum    = compensate_for_filter(a.processing, spectrum, float(a.samplingrate))
-    frequencies = linspace(0, 1, int(size(spectrum, 1)))*samplingrate(a)/2
+    spectrum    = compensate_for_filter(a.processing, spectrum, samplingrate(a))
+    frequencies = linspace(0, 1, Int(size(spectrum, 1)))*samplingrate(a)/2
 
     to_save = nothing
     for freq in freq_of_interest
@@ -30,7 +30,7 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
 
         result = DataFrame( ID                  = vec(repmat([ID], length(a.channel_names), 1)),
                             Channel             = copy(a.channel_names),
-                            ModulationRate      = copy(float(a.modulationrate)),
+                            ModulationRate      = copy(modulationrate(a)),
                             AnalysisType        = "hotelling",
                             AnalysisFrequency   = actual_freq,
                             SignalPower         = vec(signal),
