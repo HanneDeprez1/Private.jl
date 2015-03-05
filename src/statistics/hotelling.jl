@@ -13,13 +13,13 @@ using Gadfly
 Hotelling test on SSR data
 Saves results in a.processing["hotelling"]
 """ ->
-function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=modulationrate(a), ID::String="", kwargs...)
+function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray) = modulationrate(a), ID::String = "",
+    spectrum_type::Function = _hotelling_spectrum, data_type::String="epochs", kwargs...)
 
     # Calculate spectrum of each epoch
     # Do calculation here once, instead of in each low level call
-    spectrum    = _hotelling_spectrum(a.processing["epochs"])
-    spectrum    = compensate_for_filter(a.processing, spectrum, samplingrate(a))
-    frequencies = linspace(0, 1, Int(size(spectrum, 1)))*samplingrate(a)/2
+    spectrum, frequencies = spectrum_type(a.processing[data_type], samplingrate(a), freq_of_interest)
+    spectrum  = compensate_for_filter(a.processing, spectrum, samplingrate(a))
 
     to_save = nothing
     for freq in freq_of_interest
@@ -119,6 +119,30 @@ function _hotelling_T2_1sample(data; corr::Number=1)
 end
 
 
+
+function _apes_spectrum{T <: FloatingPoint}(sweep::Array{T,3}, fs::Number, freq_of_interest)
+
+    spectrum = apes(sweep, freq_of_interest / (fs / 2))
+
+    return spectrum, freq_of_interest
+end
+
+
+# Calculate spectrum and return the associated frequencies
+# Ignore the freq_of_interest variable as this is used for other spectrum estimation types
+function _hotelling_spectrum{T <: FloatingPoint}(sweep::Array{T,3}, fs::Number, freq_of_interest)
+
+    sweepLen = size(sweep)[1]
+
+    spectrum = (2 / sweepLen) * fft(sweep, 1)[1:sweepLen / 2 + 1, :, :]
+
+    frequencies = linspace(0, 1, Int(size(spectrum, 1))) * fs / 2
+
+    return spectrum, frequencies
+end
+
+
+# For backwards compatibility. TODO remove
 function _hotelling_spectrum{T <: FloatingPoint}(sweep::Array{T,3})
 
     sweepLen = size(sweep)[1]
