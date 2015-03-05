@@ -40,11 +40,11 @@ function subsample(a::SSR; valid_triggers::Int=1,
     # Run through all the 33s and interpolate between averaged valid values
     valid_trip_idx = find(new_triggers["Code"]-252 .== 33)
 
-    count = 0
-    previous_value = 0     # Not used, but will stop
-    previous_idx   = 1     # lint error
+    cnt = 0
+    previous_value = zeros(Float32, size(a.data,2)) # Not used, but will stop
+    previous_idx = 1                                # lint errors
     for i in 1:length(valid_trip_idx)-1
-        count += 1
+        cnt += 1
 
         # Check the next index is a 34
         if new_triggers["Code"][valid_trip_idx[i]+1]-252 == 34
@@ -55,12 +55,12 @@ function subsample(a::SSR; valid_triggers::Int=1,
               debug("Averaging $(length(valid_range)) data points for subsample")
             end
 
-            mean_value  = mean(a.data[valid_range ,:], 1)
+            mean_value = mean(a.data[valid_range ,:], 1)
 
-            mean_idx    = int(round(mean(valid_range)))
+            mean_idx = Int(round(mean(valid_range)))
 
             # Only interpolate from second valid point backwards
-            if count > 1
+            if cnt > 1
 
                 idxs = [previous_idx : 1 : mean_idx]
 
@@ -72,11 +72,11 @@ function subsample(a::SSR; valid_triggers::Int=1,
             end
 
             previous_value = mean_value
-            previous_idx   = mean_idx
+            previous_idx = mean_idx
 
         else
 
-            error("Expected next trigger $count to be end of valid range. But was $(new_triggers["Code"][valid_trip_idx[i]+1]-252)")
+            error("Expected next trigger $cnt to be end of valid range. But was $(new_triggers["Code"][valid_trip_idx[i]+1]-252)")
         end
     end
 
