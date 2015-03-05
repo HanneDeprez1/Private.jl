@@ -26,11 +26,13 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray)=float(a.
 
         snrDb, phase, signal, noise, statistic = hotelling(spectrum, frequencies, freq)
 
+        actual_freq = frequencies[_find_closest_number_idx(frequencies, freq)]
+
         result = DataFrame( ID                  = vec(repmat([ID], length(a.channel_names), 1)),
                             Channel             = copy(a.channel_names),
                             ModulationRate      = copy(float(a.modulationrate)),
                             AnalysisType        = "hotelling",
-                            AnalysisFrequency   = freq,
+                            AnalysisFrequency   = actual_freq,
                             SignalPower         = vec(signal),
                             SignalPhase         = vec(phase),
                             NoisePower          = vec(noise),
@@ -81,7 +83,7 @@ function hotelling{T <: FloatingPoint}(spectrum::Array{Complex{T},3}, frequencie
         signal_phase[c]     = angle(mean(spectrum[idx, :, c], 2))[1]
 
         # Calculate noise
-        n = [squeeze(spectrum[idx, :, c], [1, 3]), mean(squeeze(spectrum[idx, :, c], [1, 3]))]
+        n = [squeeze(spectrum[idx, :, c], 1), mean(squeeze(spectrum[idx, :, c], 1))]
         n = std(n)                      # Noise amplitude per epoch
         n = n / sqrt(size(spectrum, 2)) # Noise amplitude of recording
 
@@ -136,7 +138,7 @@ function plot_hotelling{T <: FloatingPoint}(spectrum::Array{Complex{T},3}, frequ
     signal_phase     = angle(mean(spectrum[idx, :, c], 2))[1]
 
     # Calculate noise
-    n = [squeeze(spectrum[idx, :, c], [1, 3]), mean(squeeze(spectrum[idx, :, c], [1, 3]))]
+    n = [squeeze(spectrum[idx, :, c], 1), mean(squeeze(spectrum[idx, :, c], 1))]
     n = std(n)                      # Noise amplitude per epoch
     n = n / sqrt(size(spectrum, 2)) # Noise amplitude of recording
 
@@ -152,4 +154,6 @@ function plot_hotelling{T <: FloatingPoint}(spectrum::Array{Complex{T},3}, frequ
         Guide.title("SNR = $(round(snrDb[1], 3)) (dB)"))
 
     draw(PDF(fig_name, 26cm, 17cm), p)
+
+    return p
 end
