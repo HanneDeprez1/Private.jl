@@ -14,12 +14,13 @@ Hotelling test on SSR data
 Saves results in a.processing["hotelling"]
 """ ->
 function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray) = modulationrate(a), ID::String = "",
-    spectrum_type::Function = _hotelling_spectrum, data_type::String="epochs", kwargs...)
+    spectrum_type::Function = _hotelling_spectrum, data_type::String="epochs",
+    fs::Number=samplingrate(a), kwargs...)
 
     # Calculate spectrum of each epoch
     # Do calculation here once, instead of in each low level call
-    spectrum, frequencies = spectrum_type(a.processing[data_type], samplingrate(a), freq_of_interest)
-    spectrum  = compensate_for_filter(a.processing, spectrum, samplingrate(a))
+    spectrum, frequencies = spectrum_type(a.processing[data_type], fs, freq_of_interest)
+    spectrum  = compensate_for_filter(a.processing, spectrum, fs)
 
     to_save = nothing
     for freq in freq_of_interest
@@ -136,7 +137,7 @@ function _hotelling_spectrum{T <: FloatingPoint}(sweep::Array{T,3}, fs::Number, 
 
     spectrum = (2 / sweepLen) * fft(sweep, 1)[1:sweepLen / 2 + 1, :, :]
 
-    frequencies = linspace(0, 1, Int(size(spectrum, 1))) * fs / 2
+    frequencies = linspace(0, 1, size(spectrum, 1)) * fs / 2
 
     return spectrum, frequencies
 end
