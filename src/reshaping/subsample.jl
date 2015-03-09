@@ -1,6 +1,6 @@
 using Gadfly
 
-function subsample(a::SSR; valid_triggers::Int=1,
+function subsample(a::SSR; valid_triggers::Int=-4,
                    temptrigger_rate::FloatingPoint=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
                    subsample_start_delay::Number=0.001, temptrigger_start_idx=33,
                    subsample_stop_delay::Number=0.0015, temptrigger_stop_idx=34,
@@ -57,7 +57,7 @@ function subsample(a::SSR; valid_triggers::Int=1,
 
             mean_value = mean(a.data[valid_range ,:], 1)
 
-            mean_idx = Int(round(mean(valid_range)))
+            mean_idx = int(round(mean(valid_range)))
 
             # Only interpolate from second valid point backwards
             if cnt > 1
