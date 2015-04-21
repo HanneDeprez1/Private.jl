@@ -13,14 +13,14 @@ using Gadfly
 Hotelling test on SSR data
 Saves results in a.processing["hotelling"]
 """ ->
-function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray) = modulationrate(a), ID::String = "",
+function hotelling(s::SSR; freq_of_interest::Union(Real, AbstractArray) = modulationrate(s), ID::String = "",
     spectrum_type::Function = _hotelling_spectrum, data_type::String="epochs",
-    fs::Number=samplingrate(a), kwargs...)
+    fs::Number=samplingrate(s), results_key::String="statistics", kwargs...)
 
     # Calculate spectrum of each epoch
     # Do calculation here once, instead of in each low level call
-    spectrum, frequencies = spectrum_type(a.processing[data_type], fs, freq_of_interest)
-    spectrum  = compensate_for_filter(a.processing, spectrum, fs)
+    spectrum, frequencies = spectrum_type(s.processing[data_type], fs, freq_of_interest)
+    spectrum  = compensate_for_filter(s.processing, spectrum, fs)
 
     to_save = nothing
     for freq in freq_of_interest
@@ -29,9 +29,9 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray) = modula
 
         actual_freq = frequencies[_find_closest_number_idx(frequencies, freq)]
 
-        result = DataFrame( ID                  = vec(repmat([ID], length(a.channel_names), 1)),
-                            Channel             = copy(a.channel_names),
-                            ModulationRate      = copy(modulationrate(a)),
+        result = DataFrame( ID                  = vec(repmat([ID], length(s.channel_names), 1)),
+                            Channel             = copy(s.channel_names),
+                            ModulationRate      = copy(modulationrate(s)),
                             AnalysisType        = "hotelling",
                             AnalysisFrequency   = actual_freq,
                             SignalPower         = vec(signal),
@@ -39,20 +39,18 @@ function hotelling(a::SSR; freq_of_interest::Union(Real, AbstractArray) = modula
                             NoisePower          = vec(noise),
                             SNRdB               = vec(snrDb),
                             Statistic           = vec(statistic)  )
+
         result = add_dataframe_static_rows(result, kwargs)
 
-        if freq == freq_of_interest[1]
-            to_save = result
+        if haskey(s.processing, results_key)
+            s.processing[results_key] = vcat(s.processing[results_key], result)
         else
-            to_save = vcat(to_save, result)
+            s.processing[results_key] = result
         end
 
     end
 
-    key_name = new_processing_key(a.processing, "hotelling")
-    merge!(a.processing, @compat Dict(key_name => to_save) )
-
-    return a
+    return s
 end
 
 # Backward compatibility
