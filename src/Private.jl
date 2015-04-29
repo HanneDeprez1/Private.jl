@@ -6,7 +6,8 @@ export
 include("statistics/hotelling.jl")
 
 export
-    subsample
+    subsample,
+    blank
 include("reshaping/subsample.jl")
 
 end # module

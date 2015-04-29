@@ -25,3 +25,10 @@ println(a.processing["statistics"])
 # These values are not validated, but just to ensure it doesn't change
 # TODO get true values to check with
 # @test_approx_eq_eps a.processing["statistics"][:SNRdB] [NaN, -0.0474418, -1.42819, -0.334432, -2.56155, -1.39146] 0.002
+
+
+a = read_SSR(fname)
+
+a.processing["Carrier_Frequency"] = 500
+
+a = blank(a, 0.0018, valid_triggers=1)
