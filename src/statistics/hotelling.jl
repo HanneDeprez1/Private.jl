@@ -32,7 +32,7 @@ function hotelling(s::SSR; freq_of_interest::Union(Real, AbstractArray) = modula
         result = DataFrame( ID                  = vec(repmat([ID], length(s.channel_names), 1)),
                             Channel             = copy(s.channel_names),
                             ModulationRate      = copy(modulationrate(s)),
-                            AnalysisType        = "hotelling",
+                            AnalysisType        = "Hotelling",
                             AnalysisFrequency   = actual_freq,
                             SignalPower         = vec(signal),
                             SignalPhase         = vec(phase),
