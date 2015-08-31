@@ -6,6 +6,7 @@ using Lint
 Logging.configure(level=DEBUG)
 
 include("statistics/hotelling.jl")
+include("statistics/kalman.jl")
 include("reshaping/subsample.jl")
 include("../profiling/profile.jl")
 lintpkg( "Private" )
