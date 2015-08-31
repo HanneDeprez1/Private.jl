@@ -22,7 +22,6 @@ function hotelling(s::SSR; freq_of_interest::Union(Real, AbstractArray) = modula
     spectrum, frequencies = spectrum_type(s.processing[data_type], fs, freq_of_interest)
     spectrum  = compensate_for_filter(s.processing, spectrum, fs)
 
-    to_save = nothing
     for freq in freq_of_interest
 
         snrDb, phase, signal, noise, statistic = hotelling(spectrum, frequencies, freq)
