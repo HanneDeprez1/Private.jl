@@ -15,5 +15,6 @@ before_install:
   - julia -e 'Pkg.add("SIUnits"); Pkg.checkout("SIUnits")'
   - julia -e 'Pkg.add("Lint"); Pkg.checkout("Lint")'
   - julia -e 'Pkg.clone("git://github.com/codles/EEG.jl.git"); Pkg.checkout("EEG"); Pkg.build("EEG")'
+  - julia -e 'Pkg.build("Tk")'
 script:
   - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.test("Private")'
