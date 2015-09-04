@@ -18,7 +18,7 @@ s.modulationrate = assr_frequency(40)
 
 s = rereference(s, "Cz")
 
-s = kalman_filt(s)
+s = kalman_filter(s)
 
 println(s.processing["statistics"])
 
@@ -34,7 +34,7 @@ for n in 1:size(s.data, 2)
 end
 s.data = new_data
 
-s = kalman_filt(s)
+s = kalman_filter(s)
 println(s.processing["statistics"])
 
 @test_approx_eq_eps mean(s.processing["statistics"][:SignalAmplitude][7:end]) sqrt(2) 0.1

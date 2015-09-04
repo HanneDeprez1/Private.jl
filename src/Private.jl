@@ -1,7 +1,12 @@
 module Private
 
+using EEG         # General
+using TimeModels  # Kalman
+using LsqFit      # Detrend
+using Loess       # Detrend
+
 export
-    kalman_filt
+    kalman_filter
 include("statistics/kalman.jl")
 
 export
@@ -13,5 +18,9 @@ export
     subsample,
     blank
 include("reshaping/subsample.jl")
+
+export
+    detrend
+include("reshaping/detrend.jl")
 
 end # module
