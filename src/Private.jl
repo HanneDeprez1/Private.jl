@@ -6,7 +6,9 @@ using LsqFit      # Detrend
 using Loess       # Detrend
 
 export
-    kalman_filter
+    kalman_filter,
+    set_nans,
+	model_amplitude
 include("statistics/kalman.jl")
 
 export
@@ -20,7 +22,8 @@ export
 include("reshaping/subsample.jl")
 
 export
-    detrend
+    detrend,
+    trend
 include("reshaping/detrend.jl")
 
 end # module
