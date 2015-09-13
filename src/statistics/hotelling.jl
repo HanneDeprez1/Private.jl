@@ -33,9 +33,9 @@ function hotelling(s::SSR; freq_of_interest::Union(Real, AbstractArray) = modula
                             ModulationRate      = copy(modulationrate(s)),
                             AnalysisType        = "Hotelling",
                             AnalysisFrequency   = actual_freq,
-                            SignalPower         = vec(signal),
+                            SignalAmplitude     = vec(sqrt(signal)),
                             SignalPhase         = vec(phase),
-                            NoisePower          = vec(noise),
+                            NoiseAmplitude      = vec(sqrt(noise)),
                             SNRdB               = vec(snrDb),
                             Statistic           = vec(statistic)  )
 
