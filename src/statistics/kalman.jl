@@ -37,7 +37,7 @@ function TimeModels.kalman_filter(s::SSR;
 
             model = model_type(freq, samplingrate(s), proc_noise_cov, obs_noise_cov[elec_idx, elec_idx], error_cov, x0)
 
-            f = kalman_smooth( s.data[:, elec_idx], model)
+            f = kalman_smooth(s.data[:, elec_idx], model)
 
             amp = reduction_method(model_amplitude(f, s))
             noi = std(model_amplitude_time(f, s))
@@ -49,10 +49,12 @@ function TimeModels.kalman_filter(s::SSR;
                                 AnalysisFrequency   = freq,
                                 SignalAmplitude     = amp,
                                 NoiseAmplitude      = noi,
-                                SNRdB               = (amp^2) / (noi^2),
+                                SNRdB               = 10 * log10((amp^2) / (noi^2)),
                                 StateVariable1      = f.smoothed[end, 1],
                                 StateVariable2      = f.smoothed[end, 2],
-                                ObservationCov      = obs_noise_cov[elec_idx, elec_idx])
+                                ProcessCov          = proc_noise_cov,
+                                ObservationCov      = obs_noise_cov[elec_idx, elec_idx],
+                                ErrorCov            = error_cov)
 
             result = add_dataframe_static_rows(result, kwargs)
 
@@ -77,13 +79,13 @@ function model_amplitude{T <: Number}(filte::KalmanSmoothed{T}, s::SSR)
     amp = sqrt(amp[:, 1].^2 .+ amp[:, 2].^2)
 end
 
-function model_amplitude_time{T <: Number}(filte::KalmanSmoothed{T}, s::SSR)
+function model_amplitude{T <: Number}(filte::KalmanFiltered{T}, s::SSR)
 
     amp = filte.filtered[find(~isnan(s.data[:, 1])), :]
     amp = sqrt(amp[:, 1].^2 .+ amp[:, 2].^2)
 end
 
-function model_amplitude{T <: Number}(filte::KalmanFiltered{T}, s::SSR)
+function model_amplitude_time{T <: Number}(filte::KalmanSmoothed{T}, s::SSR)
 
     amp = filte.filtered[find(~isnan(s.data[:, 1])), :]
     amp = sqrt(amp[:, 1].^2 .+ amp[:, 2].^2)
@@ -107,30 +109,45 @@ Build a basic SSR model with single sinusoid at the modulation rate.
 
 Returns a state space model.
 
+#### Parameters
+
+* 'modulation_rate': Modulation rate of sinusoid to match
+* 'sample_rate': Sample rate of signal
+* 'v': Process noise covariance (1e-10)
+* 'w': Observation noise covariance (covariance of signal)
+* 'p': Error covariance, measure of accuracy of state estimate (1.0)
+* 'x0': Initial state estimates
+* 'num_sensors': Number of sensors
+
 """
-function acoustic_model{T}(modulation_rate::T, sample_rate::T, v::T, w::T, p::T, x0::Vector{T}; kwargs...)
+function acoustic_model{T}(modulation_rate::T, sample_rate::T, v::T, w::T, p::T, x0::Vector{T};
+            num_sensors::Int = 1, kwargs...)
 
-    n = length(x0)  # Number of state variables
-    V = v * eye(n)  # Process noise covariance
-    W = diagm([w])  # Observation noise covariance
-    P0 = p * eye(n) # Initial
+    num_states = length(x0)                 # Number of state variables
+    V = v * eye(num_states)                 # Process noise covariance
+    W = w * eye(num_sensors)                # Observation noise covariance
+    P0 = p * eye(num_states)                # Initial noice covariance
 
-    acoustic_model(modulation_rate, sample_rate, V, W, P0, x0; kwargs...)
+    acoustic_model(num_sensors, modulation_rate, sample_rate, V, W, P0, x0; kwargs...)
 end
 
-function acoustic_model{T}(modulation_rate::T, sample_rate::T, V::Array{T, 2}, W::Array{T, 2}, P0::Array{T, 2}, x0::Array{T, 1}; kwargs...)
+function acoustic_model{T}(num_sensors::Int, modulation_rate::T, sample_rate::T,
+            V::Array{T, 2}, W::Array{T, 2}, P0::Array{T, 2}, x0::Array{T, 1}; kwargs...)
 
     Δt = 1 / sample_rate
     ω = 2 * pi * modulation_rate
-    n = 2
+    num_states = length(x0)
 
     ## Process transition
-    F = eye(2)
+    F = eye(num_states)
+
+    G = Array(Function, num_sensors, num_states)
 
     ## Observation
-    function G1(k);  cos(ω * Δt * k); end
-    function G2(k); -sin(ω * Δt * k); end
-    G = reshape([G1, G2], 1, n)
+    for sensor in 1:num_sensors
+        G[sensor, 1] = k ->  cos(ω * Δt * k)
+        G[sensor, 2] = k -> -sin(ω * Δt * k)
+    end
 
     StateSpaceModel(F, V, G, W, x0, P0)
 end
