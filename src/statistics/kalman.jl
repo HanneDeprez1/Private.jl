@@ -1,14 +1,31 @@
-function TimeModels.kalman_filter(s::SSR; freq_of_interest::Union(Real, AbstractArray) = modulationrate(s),
-            model_type::Function = acoustic_model, ID::String = "", x0=[0.0, 0.0], results_key::String = "statistics",
-            proc_noise_cov = 1e-10, obs_noise_cov = cov(s.data), state_noise_cov = 1.0,
-            amp_est_start::Int = int(round(samplingrate(s) * 30)), kwargs...)
+using TimeModels
 
-    info("Running kalman filter analysis on SSR data")
+"""
+Use a kalman filter to estimate signal amplitude
+
+#### Arguments
+
+* 'freq_of_interest': Frequencies to analyse (modulation rate)
+* 'model_type': Type of model to use (single channel ASSR)
+* 'ID': Value to store as ID (empty "")
+* 'results_key': Where to store results in processing dictionary ("statistics")
+* 'proc_noise_cov': Process noise covariance (1e-10)
+* 'obs_noise_cov': Observation noise covariance (covariance of signal)
+* 'error_cov': Error covariance, measure of accuracy of state estimate (1.0)
+* 'x0': Initial state estimates
+
+"""
+function TimeModels.kalman_filter(s::SSR;
+            freq_of_interest::Union(Real, AbstractArray) = modulationrate(s),
+            model_type::Function = acoustic_model, reduction_method::Function = mean,
+            ID::String = "", results_key::String = "statistics",
+            proc_noise_cov = 1e-10, obs_noise_cov = cov(s.data[find(~isnan(s.data[:, 1])), :]),
+            error_cov = 1.0, x0=[0.0, 0.0], kwargs...)
+
+    info("Running single channel Kalman filter on SSR data for $(size)")
 
     # Convert data to 64 bit type
     s.data = convert(Array{Float64, 2}, s.data)
-
-    # Ensure parameters are the same type
     obs_noise_cov = convert(Array{typeof(proc_noise_cov)}, obs_noise_cov)
 
     for freq in freq_of_interest
@@ -18,11 +35,11 @@ function TimeModels.kalman_filter(s::SSR; freq_of_interest::Union(Real, Abstract
 
             debug("Processing channel $elec in index $elec_idx")
 
-            model = model_type(freq, samplingrate(s), proc_noise_cov, obs_noise_cov[elec_idx, elec_idx], state_noise_cov, x0)
+            model = model_type(freq, samplingrate(s), proc_noise_cov, obs_noise_cov[elec_idx, elec_idx], error_cov, x0)
 
             f = kalman_smooth( s.data[:, elec_idx], model)
 
-            amp = median(model_amplitude(f, s))
+            amp = reduction_method(model_amplitude(f, s))
             noi = std(model_amplitude_time(f, s))
 
             result = DataFrame( ID                  = vec([ID]),
@@ -245,7 +262,7 @@ function EASSR_model(f::Number, fs::Number; x0::Vector=[0.0, 0, 0, 150, 0, 0, 0,
 
 end
 
-function click_model(f::Number, fa::Number, fs::Number; x0::Vector=vcat(vec(0.1 * ones(6, 1)), vec(zeros(4, 1)), vec(20* ones(10, 1))), 
+function click_model(f::Number, fa::Number, fs::Number; x0::Vector=vcat(vec(0.1 * ones(6, 1)), vec(zeros(4, 1)), vec(20* ones(10, 1))),
     W::Number=0.0001, V = diagm(vcat(vec(1e-10* ones(10, 1)), vec(0.001* ones(10, 1)))))
 
     Δt = 1 / fs
@@ -301,5 +318,3 @@ function click_model(f::Number, fa::Number, fs::Number; x0::Vector=vcat(vec(0.1 
     ASSR_Model = StateSpaceModel(F, V, G, W, x0, P0)
 
 end
-
-
