@@ -335,3 +335,62 @@ function click_model(f::Number, fa::Number, fs::Number; x0::Vector=vcat(vec(0.1 
     ASSR_Model = StateSpaceModel(F, V, G, W, x0, P0)
 
 end
+
+
+
+function ftest_model(f::Number, num_noise::Int, noise_freq::Number, fs::Number, W::Number;
+    x0::Vector = zeros(2 + (2 * num_noise), 1),  V = diagm(1e-10 * ones(2 + (2 * num_noise), 1)))
+
+    Δt = 1 / fs
+    ω = 2 * pi * f
+    ωa = 2 * pi * fa
+
+    ## Process transition and noise covariance
+
+    F = eye(20)
+    # V = diagm(vcat(vec(1e-10* ones(10, 1)), vec(0.001* ones(10, 1))))
+
+    ## Observation and noise covariance
+
+    names = (:G1, :G3, :G5, :G7, :G9)
+    freqs = (1,   2,   3,   4,   5)
+    for (name, freq) in zip(names, freqs)
+        @eval function ($name)(k)
+            cos($freq * $ωa * $Δt * k)
+        end
+    end
+
+    names = (:G2, :G4, :G6, :G8, :G10)
+    freqs = (1,   2,   3,   4,   5)
+    for (name, freq) in zip(names, freqs)
+        @eval function ($name)(k)
+            -sin($freq * $ωa * $Δt * k)
+        end
+    end
+
+    names = (:M1, :M3, :M5, :M7, :M9)
+    freqs = (1,   2,   3,   4,   5)
+    for (name, freq) in zip(names, freqs)
+        @eval function ($name)(k)
+            cos($freq * $ω * $Δt * k)
+        end
+    end
+
+    names = (:M2, :M4, :M6, :M8, :M10)
+    freqs = (1,   2,   3,   4,   5)
+    for (name, freq) in zip(names, freqs)
+        @eval function ($name)(k)
+            -sin($freq * $ω * $Δt * k)
+        end
+    end
+
+    G = reshape([M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, G1, G2, G3, G4, G5, G6, G7, G8, G9, G10], 1, 20)
+    W = diagm([W])   # Noise Covariance
+
+    ## Inital guesses at state and error covariance
+
+    P0 = 20 * eye(20)
+
+    ASSR_Model = StateSpaceModel(F, V, G, W, x0, P0)
+
+end
