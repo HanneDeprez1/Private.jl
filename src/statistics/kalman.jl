@@ -22,7 +22,7 @@ function TimeModels.kalman_filter(s::SSR;
             proc_noise_cov = 1e-10, obs_noise_cov = cov(s.data[find(~isnan(s.data[:, 1])), :]),
             error_cov = 1.0, x0=[0.0, 0.0], kwargs...)
 
-    info("Running single channel Kalman filter on SSR data for $(size)")
+    Logging.info("Running single channel Kalman filter on SSR data for $(size)")
 
     # Convert data to 64 bit type
     s.data = convert(Array{Float64, 2}, s.data)
