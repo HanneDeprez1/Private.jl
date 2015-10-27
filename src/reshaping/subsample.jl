@@ -1,5 +1,5 @@
-function blank(a::SSR, blank_delay::FloatingPoint; valid_triggers::Int=-4,
-    temptrigger_rate::FloatingPoint=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
+function blank(a::SSR, blank_delay::AbstractFloat; valid_triggers::Int=-4,
+    temptrigger_rate::AbstractFloat=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
     temptrigger::Int=33)
 
     Logging.info("Blanking SSR after $blank_delay (s)")
@@ -43,7 +43,7 @@ end
 
 
 function subsample(a::SSR; valid_triggers::Int=-4,
-                   temptrigger_rate::FloatingPoint=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
+                   temptrigger_rate::AbstractFloat=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
                    subsample_start_delay::Number=0.001, temptrigger_start_idx=33,
                    subsample_stop_delay::Number=0.0015, temptrigger_stop_idx=34,
                    plot::Bool=false, plot_channel::Int=1, plot_center::Number=0.2, plot_name::String="$(a.file_name)-subsample")

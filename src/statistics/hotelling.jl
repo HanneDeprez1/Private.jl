@@ -59,7 +59,7 @@ function hotelling(a::SSR, freq_of_interest::Union{Real, AbstractArray}; kwargs.
 end
 
 
-function hotelling{T <: FloatingPoint}(spectrum::Array{Complex{T},3}, frequencies::AbstractArray, freq_of_interest::Real)
+function hotelling{T <: AbstractFloat}(spectrum::Array{Complex{T},3}, frequencies::AbstractArray, freq_of_interest::Real)
 
     Logging.info("Calculating hotelling statistic on $(size(spectrum)[end]) channels at $freq_of_interest Hz with $(size(spectrum)[2]) epochs")
 
@@ -118,7 +118,7 @@ end
 
 
 
-function _apes_spectrum{T <: FloatingPoint}(sweep::Array{T,3}, fs::Number, freq_of_interest)
+function _apes_spectrum{T <: AbstractFloat}(sweep::Array{T,3}, fs::Number, freq_of_interest)
 
     spectrum = apes(sweep, freq_of_interest / (fs / 2))
 
@@ -128,7 +128,7 @@ end
 
 # Calculate spectrum and return the associated frequencies
 # Ignore the freq_of_interest variable as this is used for other spectrum estimation types
-function _hotelling_spectrum{T <: FloatingPoint}(sweep::Array{T,3}, fs::Number, freq_of_interest)
+function _hotelling_spectrum{T <: AbstractFloat}(sweep::Array{T,3}, fs::Number, freq_of_interest)
 
     sweepLen = size(sweep)[1]
 
@@ -141,7 +141,7 @@ end
 
 
 # For backwards compatibility. TODO remove
-function _hotelling_spectrum{T <: FloatingPoint}(sweep::Array{T,3})
+function _hotelling_spectrum{T <: AbstractFloat}(sweep::Array{T,3})
 
     sweepLen = size(sweep)[1]
 
@@ -149,7 +149,7 @@ function _hotelling_spectrum{T <: FloatingPoint}(sweep::Array{T,3})
 end
 
 
-function plot_hotelling{T <: FloatingPoint}(spectrum::Array{Complex{T},3}, frequencies::AbstractArray, freq_of_interest::Real; c::Int=1, fig_name="hot.pdf")
+function plot_hotelling{T <: AbstractFloat}(spectrum::Array{Complex{T},3}, frequencies::AbstractArray, freq_of_interest::Real; c::Int=1, fig_name="hot.pdf")
 
     idx  = _find_closest_number_idx(frequencies, freq_of_interest)
     for_plots = [vec(real(spectrum[idx, :, :])) ; vec(imag(spectrum[idx, :, :]))]
