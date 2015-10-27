@@ -13,7 +13,7 @@ using Gadfly
 Hotelling test on SSR data
 Saves results in a.processing["hotelling"]
 """ ->
-function hotelling(s::SSR; freq_of_interest::Union(Real, AbstractArray) = modulationrate(s), ID::String = "",
+function hotelling(s::SSR; freq_of_interest::Union{Real, AbstractArray} = modulationrate(s), ID::String = "",
     spectrum_type::Function = _hotelling_spectrum, data_type::String="epochs",
     fs::Number=samplingrate(s), results_key::String="statistics", kwargs...)
 
@@ -53,7 +53,7 @@ function hotelling(s::SSR; freq_of_interest::Union(Real, AbstractArray) = modula
 end
 
 # Backward compatibility
-function hotelling(a::SSR, freq_of_interest::Union(Real, AbstractArray); kwargs...)
+function hotelling(a::SSR, freq_of_interest::Union{Real, AbstractArray}; kwargs...)
 
     hotelling(a; freq_of_interest=freq_of_interest, kwargs...)
 end
@@ -61,10 +61,10 @@ end
 
 function hotelling{T <: FloatingPoint}(spectrum::Array{Complex{T},3}, frequencies::AbstractArray, freq_of_interest::Real)
 
-    info("Calculating hotelling statistic on $(size(spectrum)[end]) channels at $freq_of_interest Hz with $(size(spectrum)[2]) epochs")
+    Logging.info("Calculating hotelling statistic on $(size(spectrum)[end]) channels at $freq_of_interest Hz with $(size(spectrum)[2]) epochs")
 
     idx  = _find_closest_number_idx(frequencies, freq_of_interest)
-    for_stats = [real(spectrum[idx, :, :]) , imag(spectrum[idx, :, :])]
+    for_stats = [real(spectrum[idx, :, :]) ; imag(spectrum[idx, :, :])]
 
     signal_amplitude = Array(T, size(spectrum, 3))
     signal_power     = Array(T, size(spectrum, 3))
@@ -81,7 +81,7 @@ function hotelling{T <: FloatingPoint}(spectrum::Array{Complex{T},3}, frequencie
         signal_phase[c]     = angle(mean(spectrum[idx, :, c], 2))[1]
 
         # Calculate noise
-        n = [squeeze(spectrum[idx, :, c], 1), mean(squeeze(spectrum[idx, :, c], 1))]
+        n = [squeeze(spectrum[idx, :, c], 1); mean(squeeze(spectrum[idx, :, c], 1))]
         n = std(n)                      # Noise amplitude per epoch
         n = n / sqrt(size(spectrum, 2)) # Noise amplitude of recording
 
@@ -132,7 +132,7 @@ function _hotelling_spectrum{T <: FloatingPoint}(sweep::Array{T,3}, fs::Number, 
 
     sweepLen = size(sweep)[1]
 
-    spectrum = (2 / sweepLen) * fft(sweep, 1)[1:sweepLen / 2 + 1, :, :]
+    spectrum = (2 / sweepLen) * fft(sweep, 1)[1: div(sweepLen, 2) + 1, :, :]
 
     frequencies = linspace(0, 1, size(spectrum, 1)) * fs / 2
 
