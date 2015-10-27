@@ -16,7 +16,7 @@ Use a kalman filter to estimate signal amplitude
 
 """
 function TimeModels.kalman_filter(s::SSR;
-            freq_of_interest::Union(Real, AbstractArray) = modulationrate(s),
+            freq_of_interest::Union{Real, AbstractArray} = modulationrate(s),
             model_type::Function = acoustic_model, reduction_method::Function = mean,
             ID::String = "", results_key::String = "statistics",
             proc_noise_cov = 1e-10, obs_noise_cov = cov(s.data[find(~isnan(s.data[:, 1])), :]),
