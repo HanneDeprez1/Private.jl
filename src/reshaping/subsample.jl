@@ -46,7 +46,7 @@ function subsample(a::SSR; valid_triggers::Int=-4,
                    temptrigger_rate::AbstractFloat=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
                    subsample_start_delay::Number=0.001, temptrigger_start_idx=33,
                    subsample_stop_delay::Number=0.0015, temptrigger_stop_idx=34,
-                   plot::Bool=false, plot_channel::Int=1, plot_center::Number=0.2, plot_name::String="$(a.file_name)-subsample")
+                   plot::Bool=false, plot_channel::Int=1, plot_center::Number=0.2, plot_name::AbstractString="$(a.file_name)-subsample")
 
     # Add a trigger (22) where each CI artifact starts
     # Add a trigger (33) where to start sampling the valid response

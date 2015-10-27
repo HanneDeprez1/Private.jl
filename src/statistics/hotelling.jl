@@ -13,9 +13,9 @@ using Gadfly
 Hotelling test on SSR data
 Saves results in a.processing["hotelling"]
 """ ->
-function hotelling(s::SSR; freq_of_interest::Union{Real, AbstractArray} = modulationrate(s), ID::String = "",
-    spectrum_type::Function = _hotelling_spectrum, data_type::String="epochs",
-    fs::Number=samplingrate(s), results_key::String="statistics", kwargs...)
+function hotelling(s::SSR; freq_of_interest::Union{Real, AbstractArray} = modulationrate(s), ID::AbstractString = "",
+    spectrum_type::Function = _hotelling_spectrum, data_type::AbstractString="epochs",
+    fs::Number=samplingrate(s), results_key::AbstractString="statistics", kwargs...)
 
     # Calculate spectrum of each epoch
     # Do calculation here once, instead of in each low level call
