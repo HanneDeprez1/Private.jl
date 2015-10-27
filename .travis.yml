@@ -2,10 +2,11 @@ language: julia
 os:
   - linux
 julia:
-  - release
-  # - nightly
+  # - 0.3
+  - 0.4
 notifications:
   email: false
+sudo: true
 before_install:
   - "export DISPLAY=:99.0"                                         # Required for graphics
   - "sh -e /etc/init.d/xvfb start"                                 # Required for graphics
@@ -13,8 +14,6 @@ before_install:
   - julia -e 'Pkg.clone("https://github.com/codles/MinMaxFilter.jl.git")'
   - julia -e 'Pkg.add("DSP"); Pkg.checkout("DSP")'
   - julia -e 'Pkg.add("SIUnits"); Pkg.checkout("SIUnits")'
-  - julia -e 'Pkg.add("Lint"); Pkg.checkout("Lint")'
-  - julia -e 'Pkg.clone("git://github.com/codles/EEG.jl.git"); Pkg.checkout("EEG"); Pkg.build("EEG")'
-  - julia -e 'Pkg.build("Tk")'
+  - julia -e 'Pkg.add("EEG"); Pkg.checkout("EEG")'
 script:
-  - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.test("Private")'
+  - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("Private"); Pkg.test("Private"; coverage=true)'
