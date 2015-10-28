@@ -1,5 +1,6 @@
 DSP
 LsqFit
+NLopt
 Compat
 BDF
 DataFrames
