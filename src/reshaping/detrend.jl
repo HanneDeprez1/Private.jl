@@ -14,12 +14,12 @@ function savitsky_golay(x::Vector, windowSize::Integer, polyOrder::Integer; deri
     @assert isodd(windowSize) "Window size must be an odd integer."
     @assert polyOrder < windowSize "Polynomial order must me less than window size."
 
-    halfWindow = int((windowSize-1)/2)
+    halfWindow = round(Int, (windowSize-1) / 2)
 
-    #Setup the S matrix of basis vectors. 
+    #Setup the S matrix of basis vectors.
     S = zeros(windowSize, polyOrder+1)
     for ct = 0:polyOrder
-        S[:,ct+1] = [-halfWindow:halfWindow].^(ct)
+        S[:,ct+1] = collect(-halfWindow:halfWindow).^(ct)
     end
 
     #Compute the filter coefficients for all orders
@@ -29,8 +29,8 @@ function savitsky_golay(x::Vector, windowSize::Integer, polyOrder::Integer; deri
     #Slice out the derivative order we want
     filterCoeffs = G[:,deriv+1] * factorial(deriv);
 
-    #Pad the signal with the endpoints and convolve with filter 
-    paddedX = [x[1]*ones(halfWindow), x, x[end]*ones(halfWindow)]
+    #Pad the signal with the endpoints and convolve with filter
+    paddedX = [x[1]*ones(halfWindow); x; x[end]*ones(halfWindow)]
     y = conv(filterCoeffs[end:-1:1], paddedX)
 
     #Return the valid midsection
@@ -43,7 +43,7 @@ function trend(a::SSR, chan::Int; secs = 0.5, order = 2)
 
     ls = size(a.data, 1)
 
-    windowSize = int(round(8192 * secs))
+    windowSize = round(Int, 8192 * secs)
     if iseven(windowSize)
         windowSize += 1
     end

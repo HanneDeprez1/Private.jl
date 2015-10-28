@@ -41,6 +41,7 @@ function TimeModels.kalman_filter(s::SSR;
 
             amp = reduction_method(model_amplitude(f, s))
             noi = std(model_amplitude_time(f, s))
+            pha = reduction_method(model_phase(f))
 
             result = DataFrame( ID                  = vec([ID]),
                                 Channel             = vec([elec]),
@@ -48,6 +49,7 @@ function TimeModels.kalman_filter(s::SSR;
                                 AnalysisType        = vec(["Kalman"]),
                                 AnalysisFrequency   = freq,
                                 SignalAmplitude     = amp,
+                                SignalPhase         = pha,
                                 NoiseAmplitude      = noi,
                                 SNRdB               = 10 * log10((amp^2) / (noi^2)),
                                 StateVariable1      = f.smoothed[end, 1],
@@ -101,6 +103,18 @@ function model_amplitude{T <: Number}(filte::KalmanFiltered{T})
 
     amp = filte.filtered
     amp = sqrt(amp[:, 1].^2 .+ amp[:, 2].^2)
+end
+
+function model_phase{T <: Number}(filte::KalmanSmoothed{T})
+
+    pha = filte.smoothed
+    pha = atan(pha[:, 2] ./ pha[:, 1])
+end
+
+function model_phase{T <: Number}(filte::KalmanFiltered{T})
+
+    pha = filte.filtered
+    pha = atan(pha[:, 2] ./ pha[:, 1])
 end
 
 
