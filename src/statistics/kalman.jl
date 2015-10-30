@@ -1,4 +1,4 @@
-using TimeModels
+using TimeModels, DSP
 
 """
 Use a kalman filter to estimate signal amplitude
@@ -41,7 +41,7 @@ function TimeModels.kalman_filter(s::SSR;
 
             amp = reduction_method(model_amplitude(f, s))
             noi = std(model_amplitude_time(f, s))
-            pha = reduction_method(model_phase(f))
+            pha = reduction_method(DSP.unwrap(model_phase(f), range = pi))
 
             result = DataFrame( ID                  = vec([ID]),
                                 Channel             = vec([elec]),
