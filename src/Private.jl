@@ -26,4 +26,13 @@ export
     trend
 include("reshaping/detrend.jl")
 
+export
+    import_leadfield,
+    readLFT,
+    readSRF,
+    readLOC,
+    readELP
+include("types/Leadfield/Leadfield.jl")
+include("types/Leadfield/import.jl")
+
 end # module
