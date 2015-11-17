@@ -13,6 +13,7 @@ before_install:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.clone("https://github.com/codles/MinMaxFilter.jl.git")'
   - julia -e 'Pkg.add("DSP"); Pkg.checkout("DSP")'
+  - julia -e 'Pkg.add("TimeModels"); Pkg.checkout("TimeModels")'
   - julia -e 'Pkg.add("SIUnits"); Pkg.checkout("SIUnits")'
   - julia -e 'Pkg.add("EEG"); Pkg.checkout("EEG"); Pkg.build("EEG")'
 script:
