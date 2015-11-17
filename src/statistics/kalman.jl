@@ -75,37 +75,31 @@ end
 """
 Return the amplitude for the SSR state space model
 """
-function model_amplitude{T <: Number}(filte::KalmanSmoothed{T}, s::SSR)
+function model_amplitude{T <: Number}(filte::Union{KalmanSmoothed{T}, TimeModels.KalmanSmoothedMinimal{T}}, s::SSR)
 
     amp = filte.smoothed[find(~isnan(s.data[:, 1])), :]
     amp = sqrt(amp[:, 1].^2 .+ amp[:, 2].^2)
 end
 
-function model_amplitude{T <: Number}(filte::KalmanFiltered{T}, s::SSR)
-
-    amp = filte.filtered[find(~isnan(s.data[:, 1])), :]
-    amp = sqrt(amp[:, 1].^2 .+ amp[:, 2].^2)
-end
-
-function model_amplitude_time{T <: Number}(filte::KalmanSmoothed{T}, s::SSR)
-
-    amp = filte.filtered[find(~isnan(s.data[:, 1])), :]
-    amp = sqrt(amp[:, 1].^2 .+ amp[:, 2].^2)
-end
-
-function model_amplitude{T <: Number}(filte::KalmanSmoothed{T})
+function model_amplitude{T <: Number}(filte::Union{KalmanSmoothed{T}, TimeModels.KalmanSmoothedMinimal{T}})
 
     amp = filte.smoothed
     amp = sqrt(amp[:, 1].^2 .+ amp[:, 2].^2)
 end
 
-function model_amplitude{T <: Number}(filte::KalmanFiltered{T})
+function model_amplitude_time{T <: Number}(filte::Union{KalmanSmoothed{T}, TimeModels.KalmanSmoothedMinimal{T}}, s::SSR)
 
-    amp = filte.filtered
+    amp = filte.smoothed[find(~isnan(s.data[:, 1])), :]
     amp = sqrt(amp[:, 1].^2 .+ amp[:, 2].^2)
 end
 
-function model_phase{T <: Number}(filte::KalmanSmoothed{T})
+function model_amplitude_time{T <: Number}(filte::Union{KalmanSmoothed{T}, TimeModels.KalmanSmoothedMinimal{T}})
+
+    amp = filte.smoothed
+    amp = sqrt(amp[:, 1].^2 .+ amp[:, 2].^2)
+end
+
+function model_phase{T <: Number}(filte::Union{KalmanSmoothed{T}, TimeModels.KalmanSmoothedMinimal{T}})
 
     pha = filte.smoothed
     pha = atan(pha[:, 2] ./ pha[:, 1])
@@ -155,15 +149,19 @@ function acoustic_model{T}(num_sensors::Int, modulation_rate::T, sample_rate::T,
     ## Process transition
     F = eye(num_states)
 
-    G = Array(Function, num_sensors, num_states)
+    # G = Array(Function, num_sensors, num_states)
+    #
+    # ## Observation
+    # for sensor in 1:num_sensors
+    #     G[sensor, 1] = k ->  cos(ω * Δt * k)
+    #     G[sensor, 2] = k -> -sin(ω * Δt * k)
+    # end
 
-    ## Observation
-    for sensor in 1:num_sensors
-        G[sensor, 1] = k ->  cos(ω * Δt * k)
-        G[sensor, 2] = k -> -sin(ω * Δt * k)
+    function G(k::Int)
+        [cos(ω * Δt * k); -sin(ω * Δt * k)]'
     end
 
-    StateSpaceModel(F, V, G, W, x0, P0)
+    StateSpaceModel(_->F, _->V, G, _->W, x0, P0)
 end
 
 
