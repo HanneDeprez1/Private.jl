@@ -30,7 +30,7 @@ model = Private.acoustic_model(assr_frequency(40), 8192.0, 1e-10, 5.0, 0.01, [1.
 
 new_data = Array(Float64, 8192*10, 6)
 for n in 1:size(s.data, 2)
-    x, new_data[:, n] = TimeModels.simulate(model, 8192*90)
+    x, new_data[:, n] = TimeModels.simulate(model, 8192*10)
 end
 s.data = new_data
 
