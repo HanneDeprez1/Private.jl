@@ -4,6 +4,7 @@ using EEG         # General
 using TimeModels  # Kalman
 using LsqFit      # Detrend
 using Loess       # Detrend
+using PyCall      # Cross Spectral Density
 
 export
     kalman_filter,
@@ -34,5 +35,10 @@ export
     readELP
 include("types/Leadfield/Leadfield.jl")
 include("types/Leadfield/import.jl")
+
+export
+    cross_power_spectral_density
+include("source_analysis/cpsd.jl")
+
 
 end # module

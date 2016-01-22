@@ -8,6 +8,9 @@ notifications:
   email: false
 sudo: true
 before_install:
+  - sudo pip install --upgrade pip
+  - pip install numpy --user
+  - pip install mne --user
   - "export DISPLAY=:99.0"                                         # Required for graphics
   - "sh -e /etc/init.d/xvfb start"                                 # Required for graphics
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
