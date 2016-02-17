@@ -5,6 +5,7 @@ using Lint
 
 Logging.configure(level=DEBUG)
 
+include("source_analysis/beamformer.jl")
 include("statistics/hotelling.jl")
 include("statistics/kalman.jl")
 include("reshaping/subsample.jl")
