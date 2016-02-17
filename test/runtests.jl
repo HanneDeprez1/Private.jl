@@ -9,5 +9,7 @@ include("statistics/hotelling.jl")
 include("statistics/kalman.jl")
 include("reshaping/subsample.jl")
 include("types/Leadfield/Leadfield.jl")
-#= include("../profiling/profile.jl") =#
+
+@printf("\n\n\n All tests passed. Now checking lint\n\n\n")
+
 lintpkg( "Private" )
