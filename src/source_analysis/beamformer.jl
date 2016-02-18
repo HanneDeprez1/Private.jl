@@ -339,7 +339,15 @@ end
 #
 ###############################
 
-function calculate_specific_leadfield{A <: AbstractFloat}(H::Array{A, 3}, l::Int, x::Vector{A}, y::Vector{A}, z::Vector{A}, reduce_dim::Bool, bilateral::Real, ss::Array{A, 2}; keep_vecs::Int=6, kwargs...)
+"""
+Calculate the leadfield for a specific location.
+
+Returns the leadfield for a specified location.
+"""
+function calculate_specific_leadfield{A <: AbstractFloat}(H::Array{A, 3}, l::Int,
+            x::Vector{A}, y::Vector{A}, z::Vector{A},
+            reduce_dim::Bool, bilateral::Real, ss::Array{A, 2};
+            keep_vecs::Int=3, kwargs...)
 
     N = size(H, 3)   # Sensors
 
