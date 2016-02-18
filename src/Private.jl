@@ -5,6 +5,7 @@ using TimeModels  # Kalman
 using LsqFit      # Detrend
 using Loess       # Detrend
 using PyCall      # Cross Spectral Density
+using SIUnits, SIUnits.ShortUnits
 
 export
     kalman_filter,
