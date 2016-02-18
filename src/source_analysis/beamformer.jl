@@ -278,7 +278,7 @@ function cross_spectral_density{T <: AbstractFloat}(epochs::Array{T, 3}, fmin::R
 
     keep_idx = find(abs(AbstractFloat[c[:frequencies][1] for c in csd] - ignore) .> ignore_pm)
     csd = csd[keep_idx];
-    Logging.critical("Averaging CSD over frequencies $(AbstractFloat[c[:frequencies][1] for c in csd])")
+    Logging.debug("Averaging CSD over frequencies $(AbstractFloat[c[:frequencies][1] for c in csd])")
     a = zeros(csd[1][:data])
     for i in 1:length(csd)
         a = a .+ csd[i][:data]
