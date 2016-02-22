@@ -4,8 +4,6 @@ using Logging
 using Private
 using TimeModels
 
-Logging.configure(level=DEBUG)
-
 
 ## Check functions work on real data
 

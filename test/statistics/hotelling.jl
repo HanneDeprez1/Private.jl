@@ -3,8 +3,6 @@ using Base.Test
 using Logging
 using Private
 
-Logging.configure(level=DEBUG)
-
 fname = joinpath(dirname(@__FILE__), "../data", "test_Hz19.5-testing.bdf")
 
 s = read_SSR(fname)
