@@ -1,6 +1,14 @@
 
 using ProgressMeter
 
+
+##########################
+#
+# Types - SSR
+#
+##########################
+
+
 """
 Linearly constrained minimum variance (LCMV) beamformer for epoched data.
 NAI is ratio between stimulus and control data.
@@ -23,7 +31,7 @@ function beamformer_lcmv(s::SSR, n::SSR, l::Leadfield;
     Logging.info("Performing LCMV beamforming on signal with noise data as reference")
 
     if !haskey(s.processing, "epochs") || !haskey(n.processing, "epochs")
-      Logging.critical("Epochs not calculated")
+        Logging.critical("Epochs not calculated")
     end
 
     if n_epochs > 0
@@ -33,55 +41,17 @@ function beamformer_lcmv(s::SSR, n::SSR, l::Leadfield;
 
     l = match_leadfield(l, s)
 
-    V, N, NAI = beamformer_lcmv(s.processing["epochs"], n.processing["epochs"], l.L, l.x, l.y, l.z, fs, foi; kwargs...)
+    V, N, NAI = beamformer_lcmv(s.processing["epochs"], n.processing["epochs"], l.L, fs, foi; kwargs...)
 
     VolumeImage(vec(NAI), "NAI", l.x, l.y, l.z, [1.0], "LCMV", Dict(), "Talairach")
 end
 
 
-"""
-Linearly constrained minimum variance (LCMV) beamformer for epoched data.
-NAI is ratio between frequeny of interest (`foi`) and specified control (`foi + noise_delta`) frequency.
-
-
-### Input
-
-* s = stimulus condition SSR data with epochs pre calculated
-* l = leadfield information
-
-* foi = frequency of interest for cross power spectral density calculations
-* fs = sample rate
-* n_epochs = number of epochs to average down to with aim of reducing noise
-
-"""
-function beamformer_lcmv(s::SSR, l::Leadfield;
-                         foi::Real=modulationrate(s), fs::Real=samplingrate(s), n_epochs::Int=0,
-                         freq_pm::Real = 0.5, noise_delta::Real=4.0, bilateral::Real = 15, kwargs...)
-
-    Logging.info("Performing LCMV beamforming on signal data with $(foi + noise_delta) Hz as reference")
-
-    if !haskey(s.processing, "epochs")
-          Logging.critical("Epochs not calculated")
-    end
-
-    if n_epochs > 0
-        s.processing["epochs"] = reduce_epochs(s.processing["epochs"], n_epochs)
-    end
-
-    l = match_leadfield(l, s)
-
-    C = cross_spectral_density(s.processing["epochs"], foi - freq_pm, foi + freq_pm, fs; kwargs...)
-    Q = cross_spectral_density(s.processing["epochs"], foi + noise_delta - freq_pm, foi + noise_delta + freq_pm, fs, ignore = foi; kwargs...)
-
-    @assert size(C) == size(Q)
-    @assert C != Q
-
-    Logging.debug("Covariance matrices calculated and of size $(size(Q))")
-
-    V, N, NAI = beamformer_lcmv(C, Q, l.L, l.x, l.y, l.z, bilateral; kwargs...)
-
-    VolumeImage(vec(NAI), "NAI", l.x, l.y, l.z, [1.0], "LCMV", Dict(), "Talairach")
-end
+##########################
+#
+# Low level functions
+#
+##########################
 
 
 
@@ -89,7 +59,7 @@ end
 Linearly constrained minimum variance (LCMV) beamformer for epoched data
 
 LCMV beamformer returning neural activity index (NAI), source and noise variance (Van Veen et al 1997).
-Coherent source supression for a source or region is also implemented (Dalal et al 2006).
+Source space projection is implemented (Sekihara et al 2001).
 
 
 ### Literature
@@ -102,27 +72,19 @@ Reconstructing spatio-temporal activities of neural sources using an meg vector 
 Kensuke Sekihara, Srikantan S Nagarajan, David Poeppel, Alec Marantz, and Yasushi Miyashita.
 Biomedical Engineering, IEEE Transactions on, 48(7):760–771, 2001.
 
-Modified beamformers for coherent source region suppression
-Sarang S Dalal, Kensuke Sekihara, and Srikantan S Nagarajan.
-Biomedical Engineering, IEEE Transactions on, 53(7):1357–1363, 2006.
-
 
 ### Input
 
 * x = M * T x N matrix = Signal M sample measurements over T trials on N electrodes
 * n = M * T x N matrix = Noise  M sample measurements over T trials on N electrodes
 * H = L x D x N matrix = Forward head model for L locations on N electrodes in D dimensions
-* x/y/z_loc = Cartesian locations for headmodel
 * fs = Sample rate
 * foi = Frequency of interest for cross spectral density
 * freq_pm = Frequency above and below `foi` to include in csd calculation (1.0)
-* bilateral =  Radius of bilateral region to supress. 0 implies no supression
 
 """
-function beamformer_lcmv{A <: AbstractFloat}(x::Array{A, 3}, n::Array{A, 3}, H::Array{A, 3},
-                         x_loc::Vector{A}, y_loc::Vector{A}, z_loc::Vector{A},
-                         fs::Real = 8192, foi::Real = 40.0;
-                         freq_pm::Real = 0.5, bilateral::Real = 15, kwargs...)
+function beamformer_lcmv{A <: AbstractFloat}(x::Array{A, 3}, n::Array{A, 3}, H::Array{A, 3}, fs::Real, foi::Real;
+                         freq_pm::Real = 0.5, kwargs...)
 
     Logging.debug("Starting LCMV beamforming on epoch data of size $(size(x, 1)) x $(size(x, 2)) x $(size(x, 3)) and $(size(n, 1)) x $(size(n, 2)) x $(size(n, 3))")
 
@@ -136,9 +98,6 @@ function beamformer_lcmv{A <: AbstractFloat}(x::Array{A, 3}, n::Array{A, 3}, H::
     @assert size(n, 3) == N     # Ensure inputs match
     @assert size(H, 3) == N     # Ensure inputs match
     @assert M > N               # Should have more samples than sensors
-    @assert L == length(x_loc)
-    @assert L == length(y_loc)
-    @assert L == length(z_loc)
     @assert !any(isnan(x))
     @assert !any(isnan(n))
     @assert !any(isnan(H))
@@ -152,15 +111,12 @@ function beamformer_lcmv{A <: AbstractFloat}(x::Array{A, 3}, n::Array{A, 3}, H::
     @assert size(C) == size(Q)
     @assert C != Q
 
-    Logging.debug("Covariance matrices calculated and of size $(size(Q))")
-
-    beamformer_lcmv(C, Q, H, x_loc, y_loc, z_loc, bilateral; kwargs...)
+    beamformer_lcmv(C, Q, H; kwargs...)
 end
 
 
-function beamformer_lcmv{A <: AbstractFloat}(C::Array{Complex{A}, 2}, Q::Array{Complex{A}, 2}, H::Array{A, 3},
-                              x::Vector{A}, y::Vector{A}, z::Vector{A}, bilateral::Real;
-                              reduce_dim::Bool=true, subspace::A=0.999, regularisation::A=0.003, kwargs...)
+function beamformer_lcmv{A <: AbstractFloat}(C::Array{Complex{A}, 2}, Q::Array{Complex{A}, 2}, H::Array{A, 3};
+                              subspace::A=0.95, regularisation::A=0.003, progress::Bool=false, kwargs...)
 
     Logging.debug("Computing LCMV beamformer from CPSD data")
 
@@ -206,16 +162,15 @@ function beamformer_lcmv{A <: AbstractFloat}(C::Array{Complex{A}, 2}, Q::Array{C
     invC = pinv(C)
     invQ = pinv(Q)
 
-    prog = Progress(L, 1, "  LCMV scan... ", 40)
     Logging.debug("Beamformer scan started")
-
+    if progress; prog = Progress(L, 1, "  LCMV scan... ", 40); end
     for l = 1:L
 
-        H_l = calculate_specific_leadfield(H, l, x, y, z, reduce_dim, bilateral, ss; kwargs...)
+        H_l = ss * squeeze(H[l,:,:], 1)'
 
         Variance[l], Noise[l], NAI[l] = beamformer_lcmv(invC, invQ, H_l)
 
-        next!(prog)
+        if progress; next!(prog); end
     end
 
     Logging.debug("Beamformer scan completed")
@@ -331,61 +286,6 @@ function reduce_epochs{T <: AbstractFloat}(a::Array{T, 3}, new_num_epochs::Int=3
         return a
     end
 end
-
-
-###############################
-#
-# Calculate leadfield location
-#
-###############################
-
-"""
-Calculate the leadfield for a specific location.
-
-Returns the leadfield for a specified location.
-"""
-function calculate_specific_leadfield{A <: AbstractFloat}(H::Array{A, 3}, l::Int,
-            x::Vector{A}, y::Vector{A}, z::Vector{A},
-            reduce_dim::Bool, bilateral::Real, ss::Array{A, 2};
-            keep_vecs::Int=3, kwargs...)
-
-    N = size(H, 3)   # Sensors
-
-    # Extract leadfield for location
-    H_l = squeeze(H[l,:,:], 1)'
-
-    # Coherent source suppression
-    if bilateral > 0
-
-        # Determine locations within radius of bilateral source
-        to_supress = falses(size(x))
-        for loc in 1:size(H, 1)
-            if euclidean([-x[l], y[l], z[l]], [x[loc], y[loc], z[loc]]) < bilateral
-                to_supress[loc] = true
-            end
-        end
-        Ls = H[to_supress, :, :]
-        Ls = reshape(permutedims(Ls, [3, 2, 1]), N, size(Ls, 1) * 3)
-
-        # Append bilateral sources to leadfield Dalal et al 2006
-        if reduce_dim
-            # Append singular values Dalal eqn 13
-            # Should we take a constant number of vectors or adaptive? Chosen a constant of 6 for now
-            H_l = hcat(H_l, svdfact(Ls).U[:, 1:keep_vecs])
-        else
-            # Append all points Dalal eqn 12
-            # Will be highly singular and computationally expensive
-            H_l = hcat(H_l, Ls)
-        end
-    end
-
-    # Apply subspace to leadfield in addition to covariance matrix
-    H_l = ss * H_l
-
-    return H_l
-end
-
-
 
 
 
@@ -556,4 +456,60 @@ Reduce leadfield dimensionality
 function reduce_leadfield{F <: AbstractFloat}(ldf::Array{F, 2}, keep_vecs; keep_dims = 3, kwargs...)
     hcat(ldf[:, 1:keep_dims], svdfact(ldf[:, keep_dims+1:end]).U[:, 1:keep_vecs])
 
+end
+
+
+
+
+
+
+###########################
+#
+# Removed
+#
+###########################
+
+
+"""
+Linearly constrained minimum variance (LCMV) beamformer for epoched data.
+NAI is ratio between frequeny of interest (`foi`) and specified control (`foi + noise_delta`) frequency.
+
+
+### Input
+
+* s = stimulus condition SSR data with epochs pre calculated
+* l = leadfield information
+
+* foi = frequency of interest for cross power spectral density calculations
+* fs = sample rate
+* n_epochs = number of epochs to average down to with aim of reducing noise
+
+"""
+function beamformer_lcmv(s::SSR, l::Leadfield;
+                         foi::Real=modulationrate(s), fs::Real=samplingrate(s), n_epochs::Int=0,
+                         freq_pm::Real = 0.5, noise_delta::Real=4.0, bilateral::Real = 15, kwargs...)
+
+    Logging.info("Performing LCMV beamforming on signal data with $(foi + noise_delta) Hz as reference")
+
+    if !haskey(s.processing, "epochs")
+          Logging.critical("Epochs not calculated")
+    end
+
+    if n_epochs > 0
+        s.processing["epochs"] = reduce_epochs(s.processing["epochs"], n_epochs)
+    end
+
+    l = match_leadfield(l, s)
+
+    C = cross_spectral_density(s.processing["epochs"], foi - freq_pm, foi + freq_pm, fs; kwargs...)
+    Q = cross_spectral_density(s.processing["epochs"], foi + noise_delta - freq_pm, foi + noise_delta + freq_pm, fs, ignore = foi; kwargs...)
+
+    @assert size(C) == size(Q)
+    @assert C != Q
+
+    Logging.debug("Covariance matrices calculated and of size $(size(Q))")
+
+    V, N, NAI = beamformer_lcmv(C, Q, l.L, l.x, l.y, l.z, bilateral; kwargs...)
+
+    VolumeImage(vec(NAI), "NAI", l.x, l.y, l.z, [1.0], "LCMV", Dict(), "Talairach")
 end

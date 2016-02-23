@@ -38,13 +38,11 @@ include("types/Leadfield/Leadfield.jl")
 include("types/Leadfield/import.jl")
 
 export
-    cross_power_spectral_density,
     beamformer_lcmv,
     cross_spectral_density,
     reduce_epochs,
     retain_svd,
     calculate_specific_leadfield
-include("source_analysis/cpsd.jl")
 include("source_analysis/beamformer.jl")
 
 
