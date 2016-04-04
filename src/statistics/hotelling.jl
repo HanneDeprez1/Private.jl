@@ -131,8 +131,10 @@ end
 function _hotelling_spectrum{T <: AbstractFloat}(sweep::Array{T,3}, fs::Number, freq_of_interest)
 
     sweepLen = size(sweep)[1]
+    
+    p = plan_rfft(sweep, 1, flags = FFTW.MEASURE)
 
-    spectrum = (2 / sweepLen) * fft(sweep, 1)[1: div(sweepLen, 2) + 1, :, :]
+    spectrum = (2 / sweepLen) * (p * sweep)
 
     frequencies = linspace(0, 1, size(spectrum, 1)) * fs / 2
 
@@ -141,12 +143,12 @@ end
 
 
 # For backwards compatibility. TODO remove
-function _hotelling_spectrum{T <: AbstractFloat}(sweep::Array{T,3})
-
-    sweepLen = size(sweep)[1]
-
-    (2 / sweepLen) * fft(sweep, 1)[1:sweepLen / 2 + 1, :, :]
-end
+#function _hotelling_spectrum{T <: AbstractFloat}(sweep::Array{T,3})
+#
+#    sweepLen = size(sweep)[1]
+#
+#    (2 / sweepLen) * fft(sweep, 1)[1:sweepLen / 2 + 1, :, :]
+#end
 
 
 function plot_hotelling{T <: AbstractFloat}(spectrum::Array{Complex{T},3}, frequencies::AbstractArray, freq_of_interest::Real; c::Int=1, fig_name="hot.pdf")
