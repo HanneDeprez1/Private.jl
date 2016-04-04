@@ -28,8 +28,8 @@ function hotelling(s::SSR; freq_of_interest::Union{Real, AbstractArray} = modula
 
         actual_freq = frequencies[_find_closest_number_idx(frequencies, freq)]
 
-        result = DataFrame( ID                  = vec(repmat([ID], length(s.channel_names), 1)),
-                            Channel             = copy(s.channel_names),
+        result = DataFrame( ID                  = vec(repmat([ID], length(channelnames(s)), 1)),
+                            Channel             = copy(channelnames(s)),
                             ModulationRate      = copy(modulationrate(s)),
                             AnalysisType        = "Hotelling",
                             AnalysisFrequency   = actual_freq,
