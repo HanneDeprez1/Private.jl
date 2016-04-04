@@ -219,7 +219,7 @@ function cross_spectral_density{T <: AbstractFloat}(epochs::Array{T, 3}, fmin::R
     @pyimport mne as mne
     @pyimport mne.time_frequency as tf
 
-    Logging.debug("Cross power spectral density between $fmin - $fmax Hz")
+    Logging.debug("Cross power spectral density between $fmin - $fmax Hz for signal of $fs Hz")
 
     # Convert from EEG.jl to MNE format for epochs
     epochs = permutedims(epochs, [2, 3, 1])                      # Change to trials x channels x samples
@@ -243,6 +243,11 @@ function cross_spectral_density{T <: AbstractFloat}(epochs::Array{T, 3}, fmin::R
     a = a ./ length(csd)
 
     return a
+end
+
+function cross_spectral_density(s::SSR; fmin::Real=modulationrate(s)-0.5, fmax::Real=modulationrate(s)+0.5,
+        fs::Real=samplingrate(s), kwargs...)
+    cross_spectral_density(s.processing["epochs"], fmin, fmax, fs; kwargs...)
 end
 
 
