@@ -6,7 +6,6 @@ using Logging
 using Docile
 using Compat
 using Gadfly
-@docstrings
 
 
 @doc """
