@@ -27,7 +27,7 @@ y = repmat(vec(ones(5) * collect(1:5)'), 5)
 z = vec(ones(5*5) * collect(1:5)')
 t = [1.0]
 H = rand(125, 3, 6)
-L = Leadfield(H, x, y, z, a.channel_names)
+L = Leadfield(H, x, y, z, channelnames(a))
 
 v = beamformer_lcmv(a, b, L)
 v = beamformer_lcmv(a, b, L, subspace = 0.0,  regularisation = 0.0)

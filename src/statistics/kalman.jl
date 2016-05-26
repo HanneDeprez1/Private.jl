@@ -29,9 +29,9 @@ function TimeModels.kalman_filter(s::SSR;
     obs_noise_cov = convert(Array{typeof(proc_noise_cov)}, obs_noise_cov)
 
     for freq in freq_of_interest
-        for elec in s.channel_names
+        for elec in channelnames(s)
 
-            elec_idx = findfirst(s.channel_names, elec)
+            elec_idx = findfirst(channelnames(s), elec)
 
             debug("Processing channel $elec in index $elec_idx")
 

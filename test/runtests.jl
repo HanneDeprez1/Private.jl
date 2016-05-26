@@ -4,6 +4,7 @@ using Logging
 using Lint
 
 Logging.configure(level=DEBUG)
+Logging.configure(output=open("logfile.log", "a"))
 
 include("source_analysis/beamformer.jl")
 include("statistics/hotelling.jl")
