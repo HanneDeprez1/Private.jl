@@ -6,6 +6,8 @@ EEG processing code that is for ExpORL only.
 
 [![Build Status](https://magnum.travis-ci.com/codles/Private.jl.svg?token=EhmwZNvSZsyUdgEQKvoW&branch=master)](https://magnum.travis-ci.com/codles/Private.jl)
 
+## Installation
+
 `Pkg.clone("git@github.com:codles/Private.jl.git")`
 
 
