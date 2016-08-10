@@ -250,29 +250,15 @@ Import electrode data in the BESA elp format`
 
 name, a, b = readELP(verbose=false)
 """
-function readELP(fname::AbstractString = Pkg.dir("Private", "test", "data", "Standard-10-10-Cap81.elp"); kwargs...)
+function readELP(fname::AbstractString = Pkg.dir("Private", "test", "data", "Standard-10-10-Cap81.elp"); verbose::Bool=false)
 
     debug("Electrode file: $(fname)")
 
-    file = open(fname, "r")
+    df = readtable(fname, header = false, separator = ' ')
 
-    name = AbstractString[]
-    a = AbstractFloat[]
-    b = AbstractFloat[]
-    regexp = r"(EEG|POL)\s+(\w+'?)(\s+(-?\d*.\d+)?\s+(-?\d*.\d+))?"
-
-    while !eof(file)
-
-        dm = match(regexp, readline(file))
-
-        if dm.captures[5] != nothing
-
-            push!(name, dm.captures[1])
-            push!(name, dm.captures[2])
-            push!(name, dm.captures[3])
-        end
-
+    if verbose
+        println("Electrodes:  $(length(df[:x1]))")
     end
 
-    return name, a, b
+    return df[:x1].data, df[:x2].data, df[:x3].data
 end
