@@ -43,7 +43,7 @@ function beamformer_lcmv(s::SSR, n::SSR, l::Leadfield;
 
     V, N, NAI = beamformer_lcmv(s.processing["epochs"], n.processing["epochs"], l.L, fs, foi; kwargs...)
 
-    VolumeImage(vec(NAI), "NAI", l.x, l.y, l.z, [1.0], "LCMV", Dict(), "Talairach")
+    VolumeImage(vec(NAI), "NAI", l.x, l.y, l.z, ones(size(vec(NAI))), "LCMV", Dict(), "Talairach")
 end
 
 
