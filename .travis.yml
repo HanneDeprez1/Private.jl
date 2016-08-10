@@ -21,3 +21,5 @@ before_install:
   - julia -e 'Pkg.clone("https://github.com/codles/EEG.jl.git"); Pkg.build("EEG")'
 script:
   - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("Private"); Pkg.test("Private"; coverage=true)'
+after_success:
+- julia -e 'cd(Pkg.dir("Private")); Pkg.add("Coverage"); using Coverage; Codecov.submit_token(process_folder())'
