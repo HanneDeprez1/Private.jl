@@ -22,9 +22,9 @@ b = extract_epochs(b)
 # Fake a leadfield
 #
 
-x = repmat(collect(1:5.0), 25)
-y = repmat(vec(ones(5) * collect(1:5)'), 5)
-z = vec(ones(5*5) * collect(1:5)')
+x = repmat(collect(-2:2.0), 25)
+y = repmat(vec(ones(5) * collect(-2:2.0)'), 5)
+z = vec(ones(5*5) * collect(-2:2.0)')
 t = [1.0]
 H = rand(125, 3, 6)
 L = Leadfield(H, x, y, z, channelnames(a))
@@ -39,3 +39,8 @@ show(v)
 
 cpsd = cross_spectral_density(a)
 @test isa(cpsd, Array{Complex{Float64}, 2})
+
+
+# Test bilateral correction
+v = correct_midline(v)
+@test isa(v, EEG.VolumeImage)

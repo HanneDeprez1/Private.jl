@@ -45,7 +45,8 @@ export
     beamformer_lcmv,
     cross_spectral_density,
     reduce_epochs,
-    retain_svd
+    retain_svd,
+    correct_midline
 include("source_analysis/beamformer.jl")
 include("source_analysis/cpsd.jl")
 include("source_analysis/misc.jl")
