@@ -51,12 +51,7 @@ function hotelling(s::SSR; freq_of_interest::Union{Real, AbstractArray} = modula
     return s
 end
 
-# Backward compatibility
-function hotelling(a::SSR, freq_of_interest::Union{Real, AbstractArray}; kwargs...)
-
-    hotelling(a; freq_of_interest=freq_of_interest, kwargs...)
-end
-
+@deprecate hotelling(a::SSR, freq_of_interest::Union{Real, AbstractArray}; kwargs...) hotelling(a; freq_of_interest=freq_of_interest, kwargs...)
 
 function hotelling{T <: AbstractFloat}(spectrum::Array{Complex{T},3}, frequencies::AbstractArray, freq_of_interest::Real)
 
@@ -130,7 +125,7 @@ end
 function _hotelling_spectrum{T <: AbstractFloat}(sweep::Array{T,3}, fs::Number, freq_of_interest)
 
     sweepLen = size(sweep)[1]
-    
+
     p = plan_rfft(sweep, 1, flags = FFTW.MEASURE)
 
     spectrum = (2 / sweepLen) * (p * sweep)
