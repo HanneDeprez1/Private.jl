@@ -44,6 +44,7 @@ export
     retain_svd,
     calculate_specific_leadfield
 include("source_analysis/beamformer.jl")
+include("source_analysis/cpsd.jl")
 
 
 end # module
