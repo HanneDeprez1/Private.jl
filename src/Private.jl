@@ -33,18 +33,21 @@ export
     readLFT,
     readSRF,
     readLOC,
-    readELP
+    readELP,
+    calculate_specific_leadfield,
+    calculate_specific_leadfield2
 include("types/Leadfield/Leadfield.jl")
 include("types/Leadfield/import.jl")
+include("types/Leadfield/processing.jl")
 
 export
     beamformer_lcmv,
     cross_spectral_density,
     reduce_epochs,
-    retain_svd,
-    calculate_specific_leadfield
+    retain_svd
 include("source_analysis/beamformer.jl")
 include("source_analysis/cpsd.jl")
+include("source_analysis/misc.jl")
 
 
 end # module

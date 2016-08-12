@@ -37,3 +37,5 @@ v = beamformer_lcmv(a, b, L, subspace = 0.99, regularisation = 0.001)
 
 show(v)
 
+cpsd = cross_spectral_density(a)
+@test isa(cpsd, Array{Complex{Float64}, 2})
