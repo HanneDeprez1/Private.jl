@@ -47,7 +47,7 @@ export
     reduce_epochs,
     retain_svd,
     correct_midline
-include("source_analysis/beamformer.jl")
+include("source_analysis/lcmv.jl")
 include("source_analysis/cpsd.jl")
 include("source_analysis/misc.jl")
 
