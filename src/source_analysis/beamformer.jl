@@ -1,16 +1,8 @@
-
-using ProgressMeter
-
-
-##########################
-#
-# Types - SSR
-#
-##########################
-
-
 """
+    beamformer_lcmv(s::SSR, n::SSR, l::Leadfield; foi::Real=modulationrate(s), fs::Real=samplingrate(s), n_epochs::Int=0, kwargs...)
+
 Linearly constrained minimum variance (LCMV) beamformer for epoched data.
+
 NAI is ratio between stimulus and control data.
 
 
@@ -56,6 +48,8 @@ end
 
 
 """
+    beamformer_lcmv{A <: AbstractFloat}(x::Array{A, 3}, n::Array{A, 3}, H::Array{A, 3}, fs::Real, foi::Real; freq_pm::Real = 0.5, kwargs...)
+
 Linearly constrained minimum variance (LCMV) beamformer for epoched data
 
 LCMV beamformer returning neural activity index (NAI), source and noise variance (Van Veen et al 1997).
@@ -201,7 +195,10 @@ end
 
 
 """
+    beamformer_lcmv(s::SSR, l::Leadfield)
+
 Linearly constrained minimum variance (LCMV) beamformer for epoched data.
+
 NAI is ratio between frequeny of interest (`foi`) and specified control (`foi + noise_delta`) frequency.
 
 
@@ -241,5 +238,5 @@ function beamformer_lcmv(s::SSR, l::Leadfield;
 
     V, N, NAI = beamformer_lcmv(C, Q, l.L, l.x, l.y, l.z, bilateral; kwargs...)
 
-    VolumeImage(vec(NAI), "NAI", l.x, l.y, l.z, [1.0], "LCMV", Dict(), "Talairach")
+    VolumeImage(vec(NAI), "NAI", l.x, l.y, l.z, ones(size(vec(NAI))), "LCMV", Dict(), "Talairach")
 end

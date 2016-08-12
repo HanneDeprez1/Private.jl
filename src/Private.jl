@@ -6,6 +6,7 @@ using LsqFit      # Detrend
 using Loess       # Detrend
 using PyCall      # Cross Spectral Density
 using SIUnits, SIUnits.ShortUnits
+using ProgressMeter
 
 export
     kalman_filter,
