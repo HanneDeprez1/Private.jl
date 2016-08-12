@@ -1,53 +1,4 @@
 """
-    beamformer_lcmv(s::SSR, n::SSR, l::Leadfield; kwargs...)
-
-Linearly constrained minimum variance (LCMV) beamformer for epoched data.
-
-NAI is ratio between stimulus and control data.
-
-
-### Input
-
-* s = stimulus condition SSR data with epochs pre calculated
-* n = control condition SSR with epochs pre calculated
-* l = leadfield information
-
-* foi = frequency of interest for cross power spectral density calculations
-* fs = sample rate
-* n_epochs = number of epochs to average down to with aim of reducing noise
-
-"""
-function beamformer_lcmv(s::SSR, n::SSR, l::Leadfield;
-                         foi::Real=modulationrate(s), fs::Real=samplingrate(s), n_epochs::Int=0, kwargs...)
-
-    Logging.info("Performing LCMV beamforming on signal with noise data as reference")
-
-    if !haskey(s.processing, "epochs") || !haskey(n.processing, "epochs")
-        Logging.critical("Epochs not calculated")
-    end
-
-    if n_epochs > 0
-        s.processing["epochs"] = reduce_epochs(s.processing["epochs"], n_epochs)
-        n.processing["epochs"] = reduce_epochs(n.processing["epochs"], n_epochs)
-    end
-
-    l = match_leadfield(l, s)
-
-    V, N, NAI = beamformer_lcmv(s.processing["epochs"], n.processing["epochs"], l.L, fs, foi; kwargs...)
-
-    VolumeImage(vec(NAI), "NAI", l.x, l.y, l.z, ones(size(vec(NAI))), "LCMV", Dict(), "Talairach")
-end
-
-
-##########################
-#
-# Low level functions
-#
-##########################
-
-
-
-"""
     beamformer_lcmv{A <: AbstractFloat}(x::Array{A, 3}, n::Array{A, 3}, H::Array{A, 3}, fs::Real, foi::Real; kwargs...)
 
 Linearly constrained minimum variance (LCMV) beamformer for epoched data
@@ -182,4 +133,51 @@ function beamformer_lcmv(invC::Array{Complex{Float64}, 2}, invQ::Array{Complex{F
     NAI = V_q / N_q                              # Neural activity index  Eqn 27
 
     return abs(V_q), abs(N_q), abs(NAI)
+end
+
+
+##########################
+#
+# High level functions
+#
+##########################
+
+"""
+    beamformer_lcmv(s::SSR, n::SSR, l::Leadfield; kwargs...)
+
+Linearly constrained minimum variance (LCMV) beamformer for epoched data.
+
+NAI is ratio between stimulus and control data.
+
+
+### Input
+
+* s = stimulus condition SSR data with epochs pre calculated
+* n = control condition SSR with epochs pre calculated
+* l = leadfield information
+
+* foi = frequency of interest for cross power spectral density calculations
+* fs = sample rate
+* n_epochs = number of epochs to average down to with aim of reducing noise
+
+"""
+function beamformer_lcmv(s::SSR, n::SSR, l::Leadfield;
+                         foi::Real=modulationrate(s), fs::Real=samplingrate(s), n_epochs::Int=0, kwargs...)
+
+    Logging.info("Performing LCMV beamforming on signal with noise data as reference")
+
+    if !haskey(s.processing, "epochs") || !haskey(n.processing, "epochs")
+        Logging.critical("Epochs not calculated")
+    end
+
+    if n_epochs > 0
+        s.processing["epochs"] = reduce_epochs(s.processing["epochs"], n_epochs)
+        n.processing["epochs"] = reduce_epochs(n.processing["epochs"], n_epochs)
+    end
+
+    l = match_leadfield(l, s)
+
+    V, N, NAI = beamformer_lcmv(s.processing["epochs"], n.processing["epochs"], l.L, fs, foi; kwargs...)
+
+    VolumeImage(vec(NAI), "NAI", l.x, l.y, l.z, ones(size(vec(NAI))), "LCMV", Dict(), "Talairach")
 end
