@@ -8,6 +8,7 @@ using PyCall      # Cross Spectral Density
 using SIUnits, SIUnits.ShortUnits
 using ProgressMeter
 using DataFrames
+using Plots
 
 export
     kalman_filter,
@@ -39,6 +40,10 @@ include("read_write/elp.jl")
 include("read_write/srf.jl")
 include("read_write/loc.jl")
 include("read_write/lft.jl")
+
+export
+    plotSRF
+include("plotting/srf.jl")
 
 export
     import_leadfield,
