@@ -7,6 +7,7 @@ using Loess       # Detrend
 using PyCall      # Cross Spectral Density
 using SIUnits, SIUnits.ShortUnits
 using ProgressMeter
+using DataFrames
 
 export
     kalman_filter,
@@ -30,15 +31,20 @@ export
 include("reshaping/detrend.jl")
 
 export
-    import_leadfield,
     readLFT,
     readSRF,
     readLOC,
-    readELP,
+    readELP
+include("read_write/elp.jl")
+include("read_write/srf.jl")
+include("read_write/loc.jl")
+include("read_write/lft.jl")
+
+export
+    import_leadfield,
     calculate_specific_leadfield,
     calculate_specific_leadfield2
 include("types/Leadfield/Leadfield.jl")
-include("types/Leadfield/import.jl")
 include("types/Leadfield/processing.jl")
 
 export
