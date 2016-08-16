@@ -1,3 +1,18 @@
+"""
+    import_leadfield()
+
+Return a leadfield.
+
+Simple wrapper function that calls lower level functions and returns a valid leadfield.
+
+
+#### Example
+
+```julia
+ldf = import_leadfield()
+```
+
+"""
 function import_leadfield(;verbose::Bool=false)
 
     L                     = readLFT(verbose=verbose)
