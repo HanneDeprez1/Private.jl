@@ -2,6 +2,8 @@ using Private
 using Base.Test
 using Logging
 using Lint
+using EEG
+using TimeModels
 
 Logging.configure(level=DEBUG)
 Logging.configure(output=open("logfile.log", "a"))

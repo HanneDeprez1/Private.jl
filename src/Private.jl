@@ -14,7 +14,7 @@ export
     kalman_filter,
     set_nans,
 	model_amplitude
-include("statistics/kalman.jl")
+include("statistics/kalman/kalman.jl")
 
 export
     hotelling,
