@@ -27,6 +27,11 @@ end
 #
 ###############################
 
+"""
+    reduce_epochs(Array{T, 3}, new_num_epochs::Int=30)
+
+Average epochs down to specified number of epochs.
+"""
 function reduce_epochs{T <: AbstractFloat}(a::Array{T, 3}, new_num_epochs::Int=30)
     if new_num_epochs < size(a, 2)
         ep_per_av = floor(size(a, 2) / new_num_epochs)
@@ -41,7 +46,11 @@ function reduce_epochs{T <: AbstractFloat}(a::Array{T, 3}, new_num_epochs::Int=3
     end
 end
 
+function reduce_epochs(s::SSR,  new_num_epochs::Int=30)
 
+    s.processing["epochs"] = reduce_epochs(s.processing["epochs"], new_num_epochs)
+    return s
+end
 
 ###############################
 #
