@@ -8,10 +8,24 @@ using Compat
 using Gadfly
 
 
-@doc """
+"""
+    hotelling(::SSR; kwargs...)
+
 Hotelling test on SSR data
-Saves results in a.processing["hotelling"]
-""" ->
+
+Performs a hotelling test do determine the presenence and properties of a steady state response.
+Results are stored as a data frame.
+
+#### Example
+
+```julia
+s = SSR(...)
+s = extract_epochs(s)
+s = hotelling(s)
+show(s.processing["statistics"])
+```
+
+"""
 function hotelling(s::SSR; freq_of_interest::Union{Real, AbstractArray} = modulationrate(s), ID::AbstractString = "",
     spectrum_type::Function = _hotelling_spectrum, data_type::AbstractString="epochs",
     fs::Number=samplingrate(s), results_key::AbstractString="statistics", kwargs...)
@@ -134,15 +148,6 @@ function _hotelling_spectrum{T <: AbstractFloat}(sweep::Array{T,3}, fs::Number, 
 
     return spectrum, frequencies
 end
-
-
-# For backwards compatibility. TODO remove
-#function _hotelling_spectrum{T <: AbstractFloat}(sweep::Array{T,3})
-#
-#    sweepLen = size(sweep)[1]
-#
-#    (2 / sweepLen) * fft(sweep, 1)[1:sweepLen / 2 + 1, :, :]
-#end
 
 
 function plot_hotelling{T <: AbstractFloat}(spectrum::Array{Complex{T},3}, frequencies::AbstractArray, freq_of_interest::Real; c::Int=1, fig_name="hot.pdf")
