@@ -13,6 +13,7 @@ include("types/Leadfield/Leadfield.jl")
 include("statistics/hotelling.jl")
 include("statistics/kalman.jl")
 include("reshaping/subsample.jl")
+include("reshaping/detrend.jl")
 include("plotting/srf.jl")
 
 @printf("\n\n\n All tests passed. Now checking lint\n\n\n")
