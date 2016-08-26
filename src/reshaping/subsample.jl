@@ -59,7 +59,7 @@ function subsample(a::SSR; valid_triggers::Int=-4,
     Logging.debug("Start sampling after $(round(subsample_start_delay, 8)) s")
     Logging.debug("Stop sampling after $(round(subsample_stop_delay, 8)) s")
 
-    a.processing["time"] = [1:size(a.data,1)]/samplingrate(a)
+    a.processing["time"] = collect(1:size(a.data,1)) / samplingrate(a)
 
     if plot
 
