@@ -1,13 +1,16 @@
 
-#Polynomial smoothing with the Savitsky Golay filters
-#
-# https://github.com/blakejohnson/Qlab.jl/blob/master/src/SavitskyGolay.jl
-#
-# Sources
-# ---------
-# Theory: http://www.ece.rutgers.edu/~orfanidi/intro2sp/orfanidis-i2sp.pdf
-# Python Example: http://wiki.scipy.org/Cookbook/SavitzkyGolay
+"""
+    savitsky_golay(x::Vector, windowSize::Integer, polyOrder::Integer; deriv::Integer=0)
 
+Polynomial smoothing with the Savitsky Golay filters.
+
+Copied from https://github.com/blakejohnson/Qlab.jl/blob/master/src/SavitskyGolay.jl
+
+#### Sources
+
+Theory: http://www.ece.rutgers.edu/~orfanidi/intro2sp/orfanidis-i2sp.pdf  
+Python example: http://wiki.scipy.org/Cookbook/SavitzkyGolay
+"""
 function savitsky_golay(x::Vector, windowSize::Integer, polyOrder::Integer; deriv::Integer=0)
 
     #Some error checking
@@ -38,7 +41,11 @@ function savitsky_golay(x::Vector, windowSize::Integer, polyOrder::Integer; deri
 
 end
 
+"""
+    trend(::SSR, channel::Int)
 
+Determine the trend for a steady state response signal.
+"""
 function trend(a::SSR, chan::Int; secs = 0.5, order = 2)
 
     ls = size(a.data, 1)
@@ -51,6 +58,11 @@ function trend(a::SSR, chan::Int; secs = 0.5, order = 2)
     savitsky_golay(vec(a.data[:, chan]), windowSize, order)
 end
 
+"""
+    detrend(::SSR)
+
+Remove the trend from a steady state response.
+"""
 function detrend(a::SSR; kwargs...)
 
     for c in 1:size(a.data, 2)
