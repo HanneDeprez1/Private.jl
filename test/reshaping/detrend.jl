@@ -13,3 +13,7 @@ for i in 1:5
     # display(plot(data .- Private.savitsky_golay(vec(data), 11, 2), lab = "detrended", c = :red))
 end
 
+fname = joinpath(dirname(@__FILE__), "../data", "test_Hz19.5-testing.bdf")
+
+a = read_SSR(fname)
+a = detrend(a)

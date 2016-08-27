@@ -1,4 +1,3 @@
-
 """
     savitsky_golay(x::Vector, windowSize::Integer, polyOrder::Integer; deriv::Integer=0)
 
@@ -41,12 +40,13 @@ function savitsky_golay(x::Vector, windowSize::Integer, polyOrder::Integer; deri
 
 end
 
+
 """
     trend(::SSR, channel::Int)
 
 Determine the trend for a steady state response signal.
 """
-function trend(a::SSR, chan::Int; secs = 0.5, order = 2)
+function trend(a::SSR, chan::Int; secs = 0.5, order = 2, kwargs...)
 
     ls = size(a.data, 1)
 
@@ -57,6 +57,7 @@ function trend(a::SSR, chan::Int; secs = 0.5, order = 2)
 
     savitsky_golay(vec(a.data[:, chan]), windowSize, order)
 end
+
 
 """
     detrend(::SSR)
