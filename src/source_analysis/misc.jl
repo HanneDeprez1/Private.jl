@@ -52,6 +52,8 @@ function reduce_epochs(s::SSR,  new_num_epochs::Int=30)
     return s
 end
 
+
+
 ###############################
 #
 # Correct midline for bilateral
