@@ -1,3 +1,11 @@
+"""
+    blank(s::SSR, blank_delay::AbstractFloat)
+
+Blank a steady state recording.
+
+Linearly interpolate between valid data samples.
+The pulse rate can be specified or is taken from type data.
+"""
 function blank(a::SSR, blank_delay::AbstractFloat; valid_triggers::Int=-4,
     temptrigger_rate::AbstractFloat=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
     temptrigger::Int=33, kwargs...)
@@ -41,7 +49,13 @@ function blank(a::SSR, blank_delay::AbstractFloat; valid_triggers::Int=-4,
 end
 
 
+"""
+    subsample(s::SSR)
 
+Blank steady state recording using a set of valid samples between each pulse.
+
+Assumes more than one valid sample per pulse. These valid samples are averaged then linearly interpolated between.
+"""
 function subsample(a::SSR; valid_triggers::Int=-4,
                    temptrigger_rate::AbstractFloat=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
                    subsample_start_delay::Number=0.001, temptrigger_start_idx=33,
