@@ -1,6 +1,6 @@
 function blank(a::SSR, blank_delay::AbstractFloat; valid_triggers::Int=-4,
     temptrigger_rate::AbstractFloat=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
-    temptrigger::Int=33)
+    temptrigger::Int=33, kwargs...)
 
     Logging.info("Blanking SSR after $blank_delay (s)")
 
@@ -46,7 +46,7 @@ function subsample(a::SSR; valid_triggers::Int=-4,
                    temptrigger_rate::AbstractFloat=1/a.processing["Carrier_Frequency"], temptrigger_rate_code::Int=22,
                    subsample_start_delay::Number=0.001, temptrigger_start_idx=33,
                    subsample_stop_delay::Number=0.0015, temptrigger_stop_idx=34,
-                   plot::Bool=false, plot_channel::Int=1, plot_center::Number=0.2, plot_name::AbstractString="$(a.file_name)-subsample")
+                   plot::Bool=false, kwargs...)
 
     # Add a trigger (22) where each CI artifact starts
     # Add a trigger (33) where to start sampling the valid response
@@ -62,17 +62,7 @@ function subsample(a::SSR; valid_triggers::Int=-4,
     a.processing["time"] = collect(1:size(a.data,1)) / samplingrate(a)
 
     if plot
-
-        l0 = layer( x=a.processing["time"], y=a.data[:,plot_channel], Geom.line)
-        l1 = layer( xintercept=a.triggers["Index"]/samplingrate(a), Geom.vline(color="black"))
-
-        p1 = Gadfly.plot(l0, l1,
-            Scale.x_continuous(maxvalue=maximum(a.processing["time"])),
-            #=Scale.x_continuous(minvalue=plot_center-6, maxvalue=plot_center+6),=#
-            Guide.ylabel("Amplitude (uV)"),
-            Guide.xlabel("Time (s)"),
-            Guide.title("EEG $(a.channel_names[plot_channel]) Epochs")
-            )
+        warn("Plotting functionality has been depreciated")
     end
 
     # Place trigger to indicate where electrical stimulation occurs (22)
@@ -136,76 +126,6 @@ function subsample(a::SSR; valid_triggers::Int=-4,
             error(new_triggers["Code"][1:10]-252)
             error(new_triggers["Index"][1:10])
         end
-    end
-
-
-    if plot
-
-        l2 = layer(
-            xintercept=new_triggers["Index"][new_triggers["Code"].== 22+252]/samplingrate(a),
-            Geom.vline(color="red")
-            )
-
-        l3 = layer(
-            xintercept=new_triggers["Index"][new_triggers["Code"].== 33+252]/samplingrate(a),
-            Geom.vline(color="green")
-            )
-
-        l4 = layer(
-            xintercept=new_triggers["Index"][new_triggers["Code"].== 34+252]/samplingrate(a),
-            Geom.vline(color="orange")
-            )
-
-        l5 = layer(
-            x=a.processing["time"],
-            y=a.data[:, plot_channel],
-            Theme(default_color=color("purple")),
-            Geom.line
-            )
-
-        l7 = layer(
-            xintercept=a.triggers["Index"]/samplingrate(a),
-            Geom.vline(color="black")
-            )
-
-        p2 = Gadfly.plot(
-            l2,
-            l1,
-            l0,
-            Scale.x_continuous(minvalue=plot_center-0.05, maxvalue=plot_center+0.05),
-            Guide.ylabel("Amplitude (uV)"),
-            Guide.xlabel("Time (s)"),
-            Guide.title("EEG $(a.channel_names[plot_channel]) Pulses Per Second")
-            )
-
-        p3 = Gadfly.plot(
-            l1,
-            l2,
-            l3,
-            l4,
-            l0,
-            l5,
-            Scale.x_continuous(minvalue=plot_center-0.01, maxvalue=plot_center+0.01),
-            Guide.ylabel("Amplitude (uV)"),
-            Guide.xlabel("Time (s)"),
-            Guide.title("EEG $(a.channel_names[plot_channel]) Sampled Intervals")
-            )
-
-        p4 = Gadfly.plot(
-            l7,
-            l5,
-            Scale.x_continuous(maxvalue=maximum(a.processing["time"])),
-            #=Scale.x_continuous(minvalue=plot_center-6, maxvalue=plot_center+6),=#
-            Guide.ylabel("Amplitude (uV)"),
-            Guide.xlabel("Time (s)"),
-            Guide.title("EEG $(a.channel_names[plot_channel]) Sub Sampled Data")
-            )
-
-        #=draw(SVGJS("$plot_name-3.js.svg", 14inch, 12inch), vstack(p1,p2,p3,p4))=#
-        #=draw(PNG("$plot_name.png", 14inch, 12inch), vstack(p1,p2,p3,p4))=#
-        draw(PNG("$plot_name.png", 11.02inch, 8.27inch), vstack(p1,p2,p3,p4))
-        draw(PS("$plot_name.ps", 11.02inch, 8.27inch), vstack(p1,p2,p3,p4))
-
     end
 
     return a

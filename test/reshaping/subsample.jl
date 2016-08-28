@@ -1,15 +1,11 @@
-using EEG
-using Base.Test
-using Logging
-using Private
-
 fname = joinpath(dirname(@__FILE__), "../data", "test_Hz19.5-testing.bdf")
 
 a = read_SSR(fname)
 
 a.processing["Carrier_Frequency"] = 500
 
-a = subsample(a, plot=false, plot_channel=4)
+a = subsample(a, plot=false)
+a = subsample(a, plot=true,  plot_channel=4)
 
 a = highpass_filter(a)
 
