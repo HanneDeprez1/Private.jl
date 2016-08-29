@@ -117,12 +117,12 @@ function subsample(a::SSR; valid_triggers::Int=-4,
 
             mean_value = mean(a.data[valid_range ,:], 1)
 
-            mean_idx = int(round(mean(valid_range)))
+            mean_idx = Int(round(mean(valid_range)))
 
             # Only interpolate from second valid point backwards
             if cnt > 1
 
-                idxs = [previous_idx : 1 : mean_idx]
+                idxs = collect(previous_idx : 1 : mean_idx)
 
                 for c = 1:size(a.data,2)
 

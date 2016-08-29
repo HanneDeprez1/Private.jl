@@ -4,8 +4,9 @@ a = read_SSR(fname)
 
 a.processing["Carrier_Frequency"] = 500
 
-a = subsample(a, plot=false)
+a = subsample(a)
 a = subsample(a, plot=true,  plot_channel=4)
+a = subsample(a, valid_triggers = 1)
 
 a = highpass_filter(a)
 
