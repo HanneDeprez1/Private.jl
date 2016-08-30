@@ -226,29 +226,46 @@ function triangle_artifact(t::Array{Float64,1}, fa::Number; kwargs...)
     return a
 end
 
+"""
+    set_nans(a)
 
-function set_nans(a::SSR; boundry::Int = int(8192/1), perc=0.1)
+Set samples to nan that are likely to be artifacts.
 
-    remove_me = falses(size(a.data))
+Set values to be excluded from analysis to NaN.
+Usually in ASSR analysis you would remove the epochs, but for Kalman filter the timing would then be lost.
+Instead we set the value to NaN and the filter does not updates its state estimates over these values, but does propogate the internal system.
+The artifact ± `boundary` are set to NaN. The first and last 5 samples are not altered.
 
-    while (sum(remove_me) / length(remove_me)) < perc
+Currently only works on a single channel.
+"""
+function set_nans(a::SSR; boundary::Int = round(Int, 8192/2), perc=0.1)
 
-        idx = findfirst(a.data, maximum(a.data[~remove_me]))
+    @assert size(a.data, 2) == 1 "Set NaNs only works for single channel SSR"
 
-        new_min = maximum([1, idx - boundry])
-        new_max = minimum([length(a.data), idx + boundry])
-        remove_me[new_min:new_max] = true
-    end
+    info("Removing artifacts (NaN method)")
+    debug("Input data consists of $(round(sum(isnan(a.data)) / length(a.data), 3))% NaNs")
 
-    debug((sum(remove_me) / length(remove_me)))
-
+    # We want to maintain the first and last 5 samples for Kalman filtering
+    # Save them here and replace them at the end in case they were removed
     start_data = a.data[1:5, :]
     end_data = a.data[end-5:end, :]
 
-    a.data[remove_me] = NaN
+    while (sum(isnan(a.data)) / length(a.data)) <= perc
+
+        idx = findfirst(a.data, maximum(a.data))
+
+        debug("Removing a segment of length $(2 * boundary) samples centered at sample $idx")
+
+        new_min = maximum([1, idx - boundary])
+        new_max = minimum([length(a.data), idx + boundary])
+
+        a.data[new_min:new_max] = NaN
+    end
 
     a.data[1:5, :] = start_data
     a.data[end-5:end, :] = end_data
+
+    debug("Output data consists of $(round(sum(isnan(a.data)) / length(a.data), 3))% NaNs")
 
     return a
 end

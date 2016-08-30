@@ -29,3 +29,27 @@ s = kalman_filter(s)
 println(s.processing["statistics"])
 
 @test_approx_eq_eps mean(s.processing["statistics"][:SignalAmplitude][7:end]) sqrt(2) 0.2
+
+
+
+#
+# Test setting nans
+#
+
+fname = joinpath(dirname(@__FILE__), "..", "data", "test_Hz19.5-testing.bdf")
+a = read_SSR(fname)
+a = keep_channel!(a, "Cz")
+@test any(isnan(a.data)) == false
+a = set_nans(a)
+@test any(isnan(a.data)) == true
+@test (sum(isnan(a.data)) / length(a.data)) > 0.1
+@test (sum(isnan(a.data)) / length(a.data)) < 0.2
+# Running it again shouldnt change anything
+a = set_nans(a)
+@test any(isnan(a.data)) == true
+@test (sum(isnan(a.data)) / length(a.data)) > 0.1
+@test (sum(isnan(a.data)) / length(a.data)) < 0.2
+# Up the limits
+a = set_nans(a, perc = 0.3)
+@test (sum(isnan(a.data)) / length(a.data)) > 0.3
+@test (sum(isnan(a.data)) / length(a.data)) < 0.5
