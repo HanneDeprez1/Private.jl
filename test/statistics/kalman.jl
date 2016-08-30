@@ -53,3 +53,13 @@ a = set_nans(a)
 a = set_nans(a, perc = 0.3)
 @test (sum(isnan(a.data)) / length(a.data)) > 0.3
 @test (sum(isnan(a.data)) / length(a.data)) < 0.5
+
+
+#
+# Artifact model
+#
+
+# Generate a third of second of data with 300 pulses per second
+p = Private.triangle_artifact(0:1/81920:0.33, 300)
+Plots.unicodeplots()
+Plots.plot(p)

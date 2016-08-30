@@ -201,7 +201,23 @@ function artifact_model{T}(modulation_rate::T, sample_rate::T, v::Vector{T}, w::
     StateSpaceModel(F, V, G, W, x0, P0)
 end
 
-function triangle_artifact(t::Float64, fa::Number; adj = 0.0, offset = 0.0, tol = 0.0001)
+
+# Internal function to create an artifact model.
+function triangle_artifact{T <: AbstractFloat}(t::AbstractArray{T, 1}, fa::Number; kwargs...)
+
+    info("Creating a trianglar artifact model")
+
+    a = Array(T, size(t))
+
+    for i in 1:length(t)
+        a[i] = triangle_artifact(t[i], fa; kwargs...)
+    end
+    return a
+end
+
+
+# Internal function to create an artifact model.
+function triangle_artifact{T <: AbstractFloat}(t::T, fa::Number; adj = 0.0, offset = 0.0, tol = 0.0001)
 
     dis1 = mod(-(t + offset), 1 / (fa+adj))
     dis2 = mod( (t + offset), 1 / (fa+adj))
@@ -216,15 +232,6 @@ function triangle_artifact(t::Float64, fa::Number; adj = 0.0, offset = 0.0, tol 
     return x
 end
 
-function triangle_artifact(t::Array{Float64,1}, fa::Number; kwargs...)
-
-    a = Array(Float64, size(t))
-
-    for i in 1:length(t)
-        a[i] = triangle_artifact(t[i], fa; kwargs...)
-    end
-    return a
-end
 
 """
     set_nans(a)
